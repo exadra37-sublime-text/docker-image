@@ -1,0 +1,33 @@
+
+Sublime Text 3 Docker Image
+
+Auhthor:  https://exadra37.com
+Gitlab:   https://gitlab.com/Exadra37
+Github:   https://github.com/Exadra37
+Linkedin: https://uk.linkedin.com/in/exadra37
+Twitter:  https://twitter.com/Exadra37
+
+
+Usage:
+
+sublime [OPTIONS]
+
+
+Options:
+
+Parameter   Values              Default Value           Description
+
+-a          rebuild             empty                   The action to perform.
+-b          3124, 3126, etc.    3126                    The Sublime Text Version.
+-v          /path/to/folder     /home/$USER/Developer   The absolute path to your projects.
+-h                                                      Show this help.
+
+Note:
+
+Sublime Text settings, cache and installed packages will persist in:
+/home/$USER/.docker-sublime/.config/sublime-text-3
+
+The amazing Sublime Text editor can be found in https://www.sublimetext.com.
+
+For continuous use you need to purchase a license from the Author at https://www.sublimetext.com/buy?v=3
+

@@ -1,0 +1,51 @@
+#!/bin/bash
+# @package exadra37-docker/sublime-text-3
+# @link    https://gitlab.com/u/exadra37-docker/sublime-text-3
+# @since   2017/02/05
+# @license MIT
+# @author  Exadra37(Paulo Silva) <exadra37ingmailpointcom>
+#
+# Social Links:
+# @link    Auhthor:  https://exadra37.com
+# @link    Github:   https://github.com/Exadra37
+# @link    Linkedin: https://uk.linkedin.com/in/exadra37
+# @link    Twitter:  https://twitter.com/Exadra37
+
+printf "\nNOTE: Once we are running Sublime Text from a Docker container the Sudo password will be asked...\n\n"
+
+HOME_DIR=/home/"${USER}"
+HOME_BIN_DIR="${HOME_DIR}"/bin
+VENDOR_DIR="${HOME_BIN_DIR}/.vendor/exadra37-docker/sublime-text-3"
+
+cd ~ &&
+mkdir -p "${VENDOR_DIR}" &&
+wget https://gitlab.com/exadra37-docker/sublime-text-3/repository/archive.tar.gz &&
+tar zxvf archive.tar.gz -C "${VENDOR_DIR}" --strip-components=1 &&
+./"${VENDOR_DIR}"/install.sh &&
+{
+    if [ -f ${HOME_DIR}/.profile ]
+        then
+            echo "export PATH=${HOME_BIN_DIR}:${PATH}"  >> "${HOME_DIR}/.profile"
+    fi
+
+    if [ -f ${HOME_DIR}/.bash_profile ]
+        then
+            echo "export PATH=${HOME_BIN_DIR}:${PATH}"  >> "${HOME_DIR}/.bash_profile"
+    fi
+
+    if [ -f ${HOME_DIR}/.zshrc ]
+        then
+            echo "export PATH=${HOME_BIN_DIR}:${PATH}"  >> "${HOME_DIR}/.zshrc"
+    fi
+}
+
+rm -rvf archive.tar.gz
+
+printf "\nRELOAD your Shell by closing the current terminal and open a new one...\n"
+
+printf "\nNow just type in your shell: sublime\n"
+
+printf "\nThe first time we run it will build the docker image, therefore will take some seconds...\n"
+
+printf "\nSubsequent runs will open Sublime Text editor instantaneously :)"
+

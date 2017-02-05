@@ -1,0 +1,154 @@
+#!/bin/bash
+# @package exadra37-docker/sublime-text-3
+# @link    https://gitlab.com/u/exadra37-docker/sublime-text-3
+# @since   2017/02/05
+# @license MIT
+# @author  Exadra37(Paulo Silva) <exadra37ingmailpointcom>
+#
+# Social Links:
+# @link    Auhthor:  https://exadra37.com
+# @link    Github:   https://github.com/Exadra37
+# @link    Linkedin: https://uk.linkedin.com/in/exadra37
+# @link    Twitter:  https://twitter.com/Exadra37
+
+
+########################################################################################################################
+# Functions
+########################################################################################################################
+
+    function Create_Folder_If_Not_Exists()
+    {
+        local folder="${1}"
+
+        [ -d "$folder" ] || mkdir -p "${folder}"
+    }
+
+    function Is_Not_Present_Docker_Image()
+    {
+        local image_name="${1}"
+
+        [ -z $( sudo docker images -q "${image_name}" ) ] && return 0 || return 1
+    }
+
+    function Build_Docker_Image()
+    {
+        local image_name="${1}"
+
+        local sublime_build="${2}"
+
+        local script_path="${3}"
+
+        local uid=$( id -u )
+
+        local gid=$( id -g )
+
+        sudo docker build \
+                    --build-arg HOST_USER="${USER}" \
+                    --build-arg HOST_UID="${uid}" \
+                    --build-arg HOST_GID="${gid}" \
+                    --build-arg SUBLIME_BUILD="${sublime_build}" \
+                    -t "${image_name}" \
+                    "${script_path}"/build
+    }
+
+    function Remove_Docker_Image()
+    {
+        local image_name="${1}"
+
+        sudo docker rmi "${image_name}"
+    }
+
+    function Perform_Docker_Image_Action()
+    {
+        local image_action="${1}"
+
+        local image_name="${2}"
+
+        local sublime_build="${3}"
+
+        local script_path="${4}"
+
+        if [ "rebuild" == "${image_action}" ]
+            then
+                Remove_Docker_Image "${image_name}"
+        fi
+
+        if Is_Not_Present_Docker_Image "${image_name}"
+            then
+                Build_Docker_Image "${image_name}" "${sublime_build}" "${script_path}"
+        fi
+    }
+
+
+########################################################################################################################
+# Variables
+########################################################################################################################
+
+    SCRIPT_PATH=$(dirname $(readlink -f $0))
+
+    IMAGE_NAME="exadra37/sublime-text-3"
+
+    # Where to persist Sublime settings, cache and installed packages.
+    HOST_SUBLIME_DIR=/home/"${USER}"/.docker-sublime
+    HOST_SUBLIME_CONFIG_DIR="${HOST_SUBLIME_DIR}"/.config/sublime-text-3
+
+
+########################################################################################################################
+# Arguments
+########################################################################################################################
+
+    HOST_DEVELOPER_DIR="/home/${USER}/Developer}"
+
+    SUBLIME_BUILD="3126"
+
+    IMAGE_ACTION=""
+
+    while getopts ':a:b:v:h' flag; do
+      case "${flag}" in
+        a) IMAGE_ACTION="$OPTARG" ;;
+        b) SUBLIME_BUILD="$OPTARG"; IMAGE_ACTION="rebuild" ;;
+        v) HOST_DEVELOPER_DIR="$OPTARG" ;;
+        h) cat "${SCRIPT_PATH}"/docs/help.txt; exit 0; ;;
+        \?) printf "\noption -$OPTARG is not supported.\n"; exit 1 ;;
+        :) printf "\noption -$OPTARG requires a value.\n"; exit 1 ;;
+      esac
+    done
+
+
+########################################################################################################################
+# Validations
+########################################################################################################################
+
+    Create_Folder_If_Not_Exists "${HOST_SUBLIME_CONFIG_DIR}"
+
+
+########################################################################################################################
+# Execution
+########################################################################################################################
+
+    Perform_Docker_Image_Action "${IMAGE_ACTION}" "${IMAGE_NAME}" "${SUBLIME_BUILD}" "${SCRIPT_PATH}"
+
+    # Setup X11 server authentication
+    # @link http://wiki.ros.org/docker/Tutorials/GUI#The_isolated_way
+    XSOCK=/tmp/.X11-unix
+    XAUTH="${HOST_SUBLIME_DIR}"/.docker.xauth
+    touch "${XAUTH}"
+    xauth nlist "${DISPLAY}" | sed -e 's/^..../ffff/' | xauth -f "${XAUTH}" nmerge -
+
+    # Run Container with X11 authentication and using same user in container and host
+    # @link http://wiki.ros.org/docker/Tutorials/GUI#The_isolated_way
+    #
+    # Additional to the above tutorial:
+    #   * I set the container --workdir in the host to persist Sublime settings and cache across restarts
+    #   * I Also map my developer folder in the host to the container.
+    #   * XSOCK and XAUTH only have ready access to the Host, instead of ready and write.
+    sudo docker run --rm -it \
+        --workdir="${HOST_SUBLIME_DIR}" \
+        --volume="${HOST_SUBLIME_CONFIG_DIR}":/home/"${USER}"/.config/sublime-text-3 \
+        --volume="$HOST_DEVELOPER_DIR":/home/"${USER}"/developer \
+        --volume="${XSOCK}":"${XSOCK}":ro \
+        --volume="${XAUTH}":"${XAUTH}":ro \
+        --env="XAUTHORITY=${XAUTH}" \
+        --env="DISPLAY" \
+        --user="${USER}" \
+        "${IMAGE_NAME}"
