@@ -17,10 +17,10 @@ Options:
 
 Parameter   Values              Default Value           Description
 
--a          rebuild             empty                   The action to perform.
--b          3124, 3126, etc.    3126                    The Sublime Text Version.
--v          /path/to/folder     /home/$USER/Developer   The absolute path to your projects.
+-b          3124, 3126, etc.    3126                    The Sublime Text build number.
+-d          /path/to/dir        /home/$USER/Developer   The absolute path to your projects.
 -h                                                      Show this help.
+-r                                                      Rebuilds the Docker Image.
 
 Note:
 
