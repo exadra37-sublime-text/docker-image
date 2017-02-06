@@ -48,7 +48,7 @@
                     --build-arg HOST_GID="${gid}" \
                     --build-arg SUBLIME_BUILD="${sublime_build}" \
                     -t "${image_name}" \
-                    "${script_path}"/build
+                    "${script_path}"/../build
     }
 
     function Remove_Docker_Image()
