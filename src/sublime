@@ -103,11 +103,11 @@
 
     IMAGE_ACTION=""
 
-    while getopts ':a:b:v:h' flag; do
+    while getopts ':b:rd:h' flag; do
       case "${flag}" in
-        a) IMAGE_ACTION="$OPTARG" ;;
         b) SUBLIME_BUILD="$OPTARG"; IMAGE_ACTION="rebuild" ;;
-        v) HOST_DEVELOPER_DIR="$OPTARG" ;;
+        d) HOST_DEVELOPER_DIR="$OPTARG" ;;
+        r) IMAGE_ACTION="rebuild" ;;
         h) cat "${SCRIPT_PATH}"/docs/help.txt; exit 0; ;;
         \?) printf "\noption -$OPTARG is not supported.\n"; exit 1 ;;
         :) printf "\noption -$OPTARG requires a value.\n"; exit 1 ;;
