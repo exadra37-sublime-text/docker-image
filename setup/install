@@ -40,7 +40,7 @@ function Print_Instructions()
 
     printf "\nThe first time we run it will build the docker image, therefore will take some seconds...\n"
 
-    printf "\nSubsequent runs will open Sublime Text editor instantaneously :)"
+    printf "\nSubsequent runs will open Sublime Text editor instantaneously :)\n\n"
 }
 
 printf "\nNOTE: Once we are running Sublime Text from a Docker container the Sudo password will be asked...\n\n"
@@ -57,4 +57,4 @@ Export_Path &&
 ln -s "${VENDOR_DIR}"/src/sublime "${HOME_BIN_DIR}"/sublime &&
 Print_Instructions
 
-rm -rvf "${HOME_DIR}"/archive.tar.gz
+rm -rf "${HOME_DIR}"/archive.tar.gz
