@@ -16,13 +16,13 @@ install in any computer.
 #### Using CURL in command line:
 
 ```bash
-sh -c "$(curl -fsSL https://gitlab.com/exadra37-docker/sublime-text-3/raw/master/setup/install)"
+bash -c "$(curl -fsSL https://gitlab.com/exadra37-docker/sublime-text-3/raw/master/setup/install)"
 ```
 
 #### Using WGET in command line:
 
 ```bash
-sh -c "$(wget  https://gitlab.com/exadra37-docker/sublime-text-3/raw/master/setup/install -O -)"
+bash -c "$(wget  https://gitlab.com/exadra37-docker/sublime-text-3/raw/master/setup/install -O -)"
 ```
 
 ## How To Use Sublime Text 3 Docker Container
