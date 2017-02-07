@@ -74,3 +74,13 @@ To have the Ubuntu inside the Docker Image up to date we should rebuild the imag
 ```bash
 sublime -r
 ```
+
+#### How to Debug Sublime Text Docker Container
+
+For trouble shouting Sublime Text 3 installation we may need to go inside the docker container.
+
+To help us on that, when starting the container the exact command will be printed:
+
+```bash
+sudo docker exec -it ST3_1486504665 bash
+```

@@ -103,7 +103,11 @@
 
     IMAGE_ACTION=""
 
-    while getopts ':b:rd:h' flag; do
+    TIMESTAMP=$( date +"%s" )
+
+    CONTAINER_NAME="ST3_${TIMESTAMP}"
+
+    while getopts ':b:rd:h:' flag; do
       case "${flag}" in
         b) SUBLIME_BUILD="$OPTARG"; IMAGE_ACTION="rebuild" ;;
         d) HOST_DEVELOPER_DIR="$OPTARG" ;;
@@ -128,6 +132,9 @@
 
     Perform_Docker_Image_Action "${IMAGE_ACTION}" "${IMAGE_NAME}" "${SUBLIME_BUILD}" "${SCRIPT_PATH}"
 
+    printf "\nTo Debug the Sublime Text Docker Container:\n"
+    printf "sudo docker exec -it ${CONTAINER_NAME} bash\n\n"
+
     # Setup X11 server authentication
     # @link http://wiki.ros.org/docker/Tutorials/GUI#The_isolated_way
     XSOCK=/tmp/.X11-unix
@@ -143,6 +150,7 @@
     #   * I Also map my developer folder in the host to the container.
     #   * XSOCK and XAUTH only have ready access to the Host, instead of ready and write.
     sudo docker run --rm -it \
+        --name="${CONTAINER_NAME}" \
         --workdir="${HOST_SUBLIME_DIR}" \
         --volume="${HOST_SUBLIME_CONFIG_DIR}":/home/"${USER}"/.config/sublime-text-3 \
         --volume="$HOST_DEVELOPER_DIR":/home/"${USER}"/developer \
