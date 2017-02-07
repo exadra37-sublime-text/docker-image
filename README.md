@@ -19,7 +19,7 @@ install in any computer.
 bash -c "$(curl -fsSL https://gitlab.com/exadra37-docker/sublime-text-3/raw/master/setup/install)"
 ```
 
-#### Using WGET in command line:
+#### Using WGET in Command Line:
 
 ```bash
 bash -c "$(wget  https://gitlab.com/exadra37-docker/sublime-text-3/raw/master/setup/install -O -)"
@@ -33,7 +33,7 @@ dir `/home/$USER/.docker-sublime`.
 The default Host dir shared with the Sublime Text Container is `/home/$USER/Developer`, that we can override at any time.
 
 
-#### Run with defaults
+#### Run With Defaults
 
 ```bash
 sublime
@@ -48,7 +48,7 @@ Check how to use it at any time...
 sublime -h
 ```
 
-#### Run with other Build
+#### Run With Other Build
 
 Currently the Sublime Text build defaults to `3126`.
 
@@ -58,9 +58,9 @@ We can build the Docker Image with a previous or future build of Sublime Text, j
 sublime -b 3124
 ```
 
-#### Run with a different Developer Dir
+#### Run With Custom Developer Workspace
 
-By default `/home/$USER/Developer` on Host is mapped to Container `/home/$USER/Developer`, but we can change the path
+By default `/home/$USER/Developer/Workspace` on Host is mapped to Container `/home/$USER/Developer`, but we can change the path
  in the Host we want to map into the Container, like:
 
 ```bash

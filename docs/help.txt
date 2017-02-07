@@ -15,14 +15,14 @@ sublime [OPTIONS]
 
 Options:
 
-Parameter   Values              Default Value           Description
+Parameter   Values                  Default Value                       Description
 
--b          3124, 3126, etc.    3126                    The Sublime Text build number.
--d          /path/to/dir        /home/$USER/Developer   The absolute path to your projects.
--h                                                      Show this help.
--r                                                      Rebuilds the Docker Image.
+-b          3124, 3126, etc.        3126                                The Sublime Text build number.
+-r                                                                      Rebuilds the Docker Image.
+-w          /path/to/workspace      /home/$USER/Developer/Workspace     The absolute path to your projects.
+-h                                                                      Show this help.
 
-Note:
+Notes:
 
 Sublime Text settings, cache and installed packages will persist in:
 /home/$USER/.docker-sublime/.config/sublime-text-3
