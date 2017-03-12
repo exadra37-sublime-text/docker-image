@@ -58,6 +58,7 @@ RUN apt-get update && \
         usermod --shell /bin/bash "${HOST_USER}" && \
         usermod  --uid "${HOST_UID}" "${HOST_USER}" && \
         groupmod --gid "${HOST_GID}" "${HOST_USER}" && \
+        su "${HOST_USER}" -c 'mkdir -p /home/${HOST_USER}/local/share' && \
 
         # Install Sublime
         curl -O https://download.sublimetext.com/sublime-text_build-"${SUBLIME_BUILD}"_amd64.deb && \
