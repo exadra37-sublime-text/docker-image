@@ -1,50 +1,76 @@
 FROM ubuntu:latest
 
-MAINTAINER Exadra37
+LABEL "com.exadra37.vendor"="Exadra37"
+LABEL com.exadra37.package-name="exadra37-sublime-text-3/docker-image"
+LABEL version="0.0.1.0"
+LABEL description="Dockerize Sublime Text 3. \
+This allow us to run the Sublime Text 3 from inside a Docker Container. \
 
-RUN apt-get update && apt-get -y upgrade
+Advantages: \
+    * No need to install the ST3 in our Operating System to try it. \
+    * Try the ST3 with many different setups without be afraid to break our OS. \
+    * More secure to run, once we can destroy the container when finished, therefore if is compromised it will not \
+       infect the OS in our computer. \
+    * Keep our OS clean and free of bloated APPs, making easy to upgrade it at any time. \
+"
 
-# Install Required Dependencies
-RUN apt-get -y install \
-    ca-certificates \
-    curl \
-    git \
-    python \
-    sudo \
-    libcanberra-gtk-module \
-    libgtk2.0-0 \
-    --no-install-recommends
+# Removes DBUS warning that should be only seen by Developer
+# https://bugs.launchpad.net/ubuntu/+source/at-spi2-core/+bug/1193236
+ENV NO_AT_BRIDGE=1
 
-# Force Install of missing dependencies
-RUN apt-get -y -f install
-
-# Cleanup
-RUN rm -rf /var/lib/apt/lists/*
-
-RUN locale-gen en_GB.UTF-8
-ENV LANG en_GB.UTF-8
-ENV LANGUAGE en_GB:en
-ENV LC_ALL en_GB.UTF-8
+# Will not prompt for questions
+ARG DEBIAN_FRONTEND=noninteractive
 
 ARG HOST_USER="${HOST_USER:-dockerize-sublime}"
 ARG HOST_UID="${HOST_UID:-2000}"
 ARG HOST_GID="${HOST_GID:-2000}"
 ARG SUBLIME_BUILD="${SUBLIME_BUILD:-3126}"
 
-#Add new sudo user
-RUN useradd -m "${HOST_USER}" && \
-    echo "${HOST_USER}:${HOST_USER}" | chpasswd && \
-    usermod --shell /bin/bash "${HOST_USER}" && \
-    usermod -aG sudo "${HOST_USER}" && \
-    echo "${HOST_USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/"${HOST_USER}" && \
-    chmod 0440 /etc/sudoers.d/"${HOST_USER}" && \
-    usermod  --uid "${HOST_UID}" "${HOST_USER}" && \
-    groupmod --gid "${HOST_GID}" "${HOST_USER}"
+RUN apt-get update && \
+    apt-get -y upgrade && \
 
-# Install Sublime
-RUN curl -O https://download.sublimetext.com/sublime-text_build-"${SUBLIME_BUILD}"_amd64.deb
-RUN dpkg -i -R sublime-text_build-"${SUBLIME_BUILD}"_amd64.deb
-RUN rm -rvf sublime-text_build-"${SUBLIME_BUILD}"_amd64.deb
+    # Install Required Dependencies
+    apt-get -y install \
+        ca-certificates \
+        apt-utils \
+        dbus-x11 \
+        curl \
+        git \
+        python \
+        php7.0 \
+        libcanberra-gtk-module \
+        libgtk2.0-0 \
+        libatk-adaptor \
+        libgail-common && \
+
+        # Force Install of missing dependencies
+        apt-get -y -f install && \
+
+        # Localization
+        locale-gen en_GB.UTF-8 && \
+
+        # Cleanup
+        rm -rf /var/lib/apt/lists/* && \
+
+        #Add new sudo user
+        useradd -m "${HOST_USER}" && \
+        echo "${HOST_USER}:${HOST_USER}" | chpasswd && \
+        usermod --shell /bin/bash "${HOST_USER}" && \
+        usermod  --uid "${HOST_UID}" "${HOST_USER}" && \
+        groupmod --gid "${HOST_GID}" "${HOST_USER}" && \
+
+        # Install Sublime
+        curl -O https://download.sublimetext.com/sublime-text_build-"${SUBLIME_BUILD}"_amd64.deb && \
+        dpkg -i -R sublime-text_build-"${SUBLIME_BUILD}"_amd64.deb || echo "\n Will force install of missing ST3 dependencies...\n" && \
+
+        # Force installation of missing dependencies for Visual Studio Code
+        apt-get -y -f install && \
+        rm -rvf sublime-text_build-"${SUBLIME_BUILD}"_amd64.deb
+
+ENV LANG en_GB.UTF-8
+ENV LANGUAGE en_GB:en
+ENV LC_ALL en_GB.UTF-8
+ENV SHELL /bin/bash
 
 # Run Sublime
 CMD ["/opt/sublime_text/sublime_text", "-w"]

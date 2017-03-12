@@ -47,7 +47,7 @@
                     --build-arg HOST_UID="${uid}" \
                     --build-arg HOST_GID="${gid}" \
                     --build-arg SUBLIME_BUILD="${sublime_build}" \
-                    -t "${image_name}" \
+                    -t "${image_name}:latest" \
                     "${script_path}"/../build
     }
 
