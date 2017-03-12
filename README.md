@@ -16,16 +16,11 @@ The recommend way is to build the image locally with bash interface `sublime`. S
 
 This will map the current folder in the HOST to folder `developer` inside the Container.
 
-#### Pull image from Docker Hub
-
-```bash
-$ sudo docker pull exadra37/sublime-text-3
-```
 
 #### Download script to run the Docker Container
 
 ```bash
-$ curl -OL https://gitlab.com/exadra37-docker/sublime-text-3/raw/master/src/docker-hub.sh && chmod ug+x
+$ curl -OL https://gitlab.com/exadra37-docker/sublime-text-3/raw/master/src/docker-hub.sh && chmod ug+x docker-hub.sh
 ```
 
 #### Run Sublime Text 3 from a Docker Container
