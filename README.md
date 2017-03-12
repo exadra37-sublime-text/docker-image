@@ -10,8 +10,33 @@ The motivation to create this package come from the burn of reinstalling my Deve
 So this package is the first of a series of other packages to make my Development environment very portable, easy and fast to
 install in any computer.
 
+## How To Use From Docker Hub
 
-## How To Install Sublime Text 3 Docker Container
+The recommend way is to build the image locally with bash interface `sublime`. See instructions [here](how-to-install-sublime-text-3-docker-cli).
+
+This will map the current folder in the HOST to folder `developer` inside the Container.
+
+#### Pull image from Docker Hub
+
+```bash
+$ sudo docker pull exadra37/sublime-text-3
+```
+
+#### Download script to run the Docker Container
+
+```bash
+$ curl -OL https://gitlab.com/exadra37-docker/sublime-text-3/raw/master/src/docker-hub.sh && chmod ug+x
+```
+
+#### Run Sublime Text 3 from a Docker Container
+
+```
+$ ./docker-hub.sh
+```
+
+**NOTE:** The preferable method is to use the **Sublime Docker CLI** to build the image locally and run it.
+
+## How To Install Sublime Text 3 Docker CLI
 
 #### Using CURL in command line:
 
