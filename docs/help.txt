@@ -17,9 +17,10 @@ Options:
 
 Parameter   Values                  Default Value                       Description
 
--b          3124, 3126, etc.        3126                                The Sublime Text build number.
--r                                                                      Rebuilds the Docker Image.
--w          /path/to/workspace      /home/$USER/Developer/Workspace     The absolute path to your projects.
+-b          3124, 3126, etc.        3126                                The Sublime Text build number. This default value is set on Dockerfile.
+-i          image_name:version      exadra37/sublime-text-3             The image name to use to build Sublime. If no image name is given default one is used.
+-r          rebuild, pull                                               Rebuilds the local Docker Image or pulls a new one from Docker Hub.
+-w          /path/to/workspace      The current dir as per $PWD var     The absolute path to your projects.
 -h                                                                      Show this help.
 
 Notes:
@@ -30,4 +31,3 @@ Sublime Text settings, cache and installed packages will persist in:
 The amazing Sublime Text editor can be found in https://www.sublimetext.com.
 
 For continuous use you need to purchase a license from the Author at https://www.sublimetext.com/buy?v=3
-

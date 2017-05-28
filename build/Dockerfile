@@ -18,12 +18,16 @@ Advantages: \
 # https://bugs.launchpad.net/ubuntu/+source/at-spi2-core/+bug/1193236
 ENV NO_AT_BRIDGE=1
 
+ENV LANG en_GB.UTF-8
+ENV LANGUAGE en_GB:en
+ENV LC_ALL en_GB.UTF-8
+ENV SHELL /bin/bash
+
 # Will not prompt for questions
 ARG DEBIAN_FRONTEND=noninteractive
 
-ARG HOST_USER="${HOST_USER:-dockerize-sublime}"
-ARG HOST_UID="${HOST_UID:-2000}"
-ARG HOST_GID="${HOST_GID:-2000}"
+ARG CONTAINER_USER="${CONTAINER_USER:-sublime}"
+ARG CONTAINER_UID="${CONTAINER_UID:-1000}"
 ARG SUBLIME_BUILD="${SUBLIME_BUILD:-3126}"
 
 RUN apt-get update && \
@@ -31,13 +35,15 @@ RUN apt-get update && \
 
     # Install Required Dependencies
     apt-get -y install \
+        locales \
         ca-certificates \
         apt-utils \
         dbus-x11 \
         curl \
         git \
+        zsh \
         python \
-        php7.0 \
+        php \
         libcanberra-gtk-module \
         libgtk2.0-0 \
         libatk-adaptor \
@@ -49,29 +55,27 @@ RUN apt-get update && \
         # Localization
         locale-gen en_GB.UTF-8 && \
 
-        # Cleanup
-        rm -rf /var/lib/apt/lists/* && \
-
         #Add new sudo user
-        useradd -m "${HOST_USER}" && \
-        echo "${HOST_USER}:${HOST_USER}" | chpasswd && \
-        usermod --shell /bin/bash "${HOST_USER}" && \
-        usermod  --uid "${HOST_UID}" "${HOST_USER}" && \
-        groupmod --gid "${HOST_GID}" "${HOST_USER}" && \
-        su "${HOST_USER}" -c 'mkdir -p /home/${HOST_USER}/.local/share' && \
+        useradd -m -u ${CONTAINER_UID} -s /usr/bin/zsh ${CONTAINER_USER} && \
+
+        # Intall Oh My Zsh for root user
+        bash -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)" && \
+
+        # Intall Oh My Zsh for user
+        su "${CONTAINER_USER}" -c 'bash -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"' && \
 
         # Install Sublime
         curl -O https://download.sublimetext.com/sublime-text_build-"${SUBLIME_BUILD}"_amd64.deb && \
         dpkg -i -R sublime-text_build-"${SUBLIME_BUILD}"_amd64.deb || echo "\n Will force install of missing ST3 dependencies...\n" && \
 
-        # Force installation of missing dependencies for Visual Studio Code
+        # Force installation of missing dependencies for Sublime
         apt-get -y -f install && \
-        rm -rvf sublime-text_build-"${SUBLIME_BUILD}"_amd64.deb
+        rm -rvf sublime-text_build-"${SUBLIME_BUILD}"_amd64.deb && \
 
-ENV LANG en_GB.UTF-8
-ENV LANGUAGE en_GB:en
-ENV LC_ALL en_GB.UTF-8
-ENV SHELL /bin/bash
+        # Cleanup
+        rm -rf /var/lib/apt/lists/* 
+
+USER ${CONTAINER_USER}
 
 # Run Sublime
 CMD ["/opt/sublime_text/sublime_text", "-w"]

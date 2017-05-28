@@ -43,9 +43,8 @@
         local gid=$( id -g )
 
         sudo docker build \
-                    --build-arg HOST_USER="${USER}" \
-                    --build-arg HOST_UID="${uid}" \
-                    --build-arg HOST_GID="${gid}" \
+                    --build-arg CONTAINER_USER="${USER}" \
+                    --build-arg CONTAINER_UID="${uid}" \
                     --build-arg SUBLIME_BUILD="${sublime_build}" \
                     -t "${image_name}:latest" \
                     "${script_path}"/../build
@@ -56,6 +55,13 @@
         local image_name="${1}"
 
         sudo docker rmi "${image_name}"
+    }
+
+    function Pull_Docker_Image()
+    {
+        local image_name="${1}"
+
+        sudo docker pull "${image_name}"
     }
 
     function Perform_Docker_Image_Action()
@@ -73,10 +79,37 @@
                 Remove_Docker_Image "${image_name}"
         fi
 
-        if Is_Not_Present_Docker_Image "${image_name}"
+        if [ "pull" == "${image_action}" ]
+            then
+                Pull_Docker_Image "${image_name}"
+        fi
+
+        if [ "pull" != "${image_action}" ] && Is_Not_Present_Docker_Image "${image_name}"
             then
                 Build_Docker_Image "${image_name}" "${sublime_build}" "${script_path}"
         fi
+    }
+
+    function Print_Text_With_Label()
+    {
+        local _label_text="${1}"
+
+        local _text="${2}"
+
+        local _label_background_color="${3:-42}"
+
+        local _text_background_color="${4:-229}"
+
+        printf "\n\e[1;${_label_background_color}m ${_label_text}:\e[30;48;5;${_text_background_color}m ${_text} \e[0m \n"
+    }
+
+    function Print_Text()
+    {
+        local _text="${1}"
+
+        local _text_color="${2:-44}"
+
+        printf "\n\e[1;${_text_color}m ${_text} \e[0m \n"
     }
 
 
@@ -86,7 +119,12 @@
 
     SCRIPT_PATH=$(dirname $(readlink -f $0))
 
-    IMAGE_NAME="exadra37/st3"
+    TIMESTAMP=$( date +"%s" )
+    
+    CONTAINER_USER="sublime"
+    
+    CONTAINER_NAME="ST3_${TIMESTAMP}"
+    
 
     # Where to persist Sublime settings, cache and installed packages.
     HOST_SUBLIME_DIR=/home/"${USER}"/.docker-sublime
@@ -97,27 +135,31 @@
 # Arguments
 ########################################################################################################################
 
-    HOST_DEVELOPER_WORKSPACE="/home/${USER}/Developer/Workspace"
+    HOST_WORKSPACE="${PWD}"
 
     SUBLIME_BUILD="3126"
 
-    IMAGE_ACTION=""
+    IMAGE_NAME="exadra37/sublime-text-3"
+    
+    IMAGE_ACTION="pull"
 
-    TIMESTAMP=$( date +"%s" )
-
-    CONTAINER_NAME="ST3_${TIMESTAMP}"
-
-    while getopts ':b:rw:h' flag; do
+    while getopts ':b:i:lrw:h' flag; do
       case "${flag}" in
-        b) SUBLIME_BUILD="$OPTARG"; IMAGE_ACTION="rebuild" ;;
-        r) IMAGE_ACTION="rebuild" ;;
-        w) HOST_DEVELOPER_WORKSPACE="$OPTARG" ;;
+        b) SUBLIME_BUILD="${OPTARG}"; IMAGE_ACTION="rebuild"; CONTAINER_USER="${USER}"; ;;
+        i) IMAGE_NAME="${OPTARG}"; IMAGE_ACTION="pull"; CONTAINER_USER="sublime"; ;;
+        l) IMAGE_NAME="exadra37/st3-local"; IMAGE_ACTION=""; CONTAINER_USER="${USER}"; ;;        
+        r) IMAGE_ACTION="rebuild"; IMAGE_NAME="exadra37/st3-local"; CONTAINER_USER="${USER}"; ;;
+        w) HOST_WORKSPACE="${OPTARG}" ;;
         h) cat "${SCRIPT_PATH}"/../docs/help.txt; exit 0; ;;
-        \?) printf "\noption -$OPTARG is not supported.\n"; exit 1 ;;
-        :) printf "\noption -$OPTARG requires a value.\n"; exit 1 ;;
+        \?) Print_Text_With_Label "ERROR" "option -${OPTARG} is not supported." 41; exit 1 ;;
+        :) Print_Text_With_Label "ERROR" "option -${OPTARG} requires a value."; exit 1 ;;
       esac
     done
 
+    # /home/host-user/path/to/workspace becomes /path/to/workspace
+    #DOCKER_WORKSPACE="${HOST_WORKSPACE/${USER}/sublime}"
+    CONTAINER_WORKSPACE="/home/${CONTAINER_USER}/${HOST_WORKSPACE#*${USER}/}"
+    
 
 ########################################################################################################################
 # Validations
@@ -132,15 +174,18 @@
 
     Perform_Docker_Image_Action "${IMAGE_ACTION}" "${IMAGE_NAME}" "${SUBLIME_BUILD}" "${SCRIPT_PATH}"
 
-    printf "\nTo Debug the Sublime Text Docker Container:\n"
-    printf "sudo docker exec -it ${CONTAINER_NAME} bash\n\n"
-
+    Print_Text_With_Label "WORKSPACE MAP" "${HOST_WORKSPACE}:${CONTAINER_WORKSPACE}" 38
+    
     # Setup X11 server authentication
     # @link http://wiki.ros.org/docker/Tutorials/GUI#The_isolated_way
     XSOCK=/tmp/.X11-unix
     XAUTH="${HOST_SUBLIME_DIR}"/.docker.xauth
     touch "${XAUTH}"
     xauth nlist "${DISPLAY}" | sed -e 's/^..../ffff/' | xauth -f "${XAUTH}" nmerge -
+
+    Print_Text_With_Label "Using Docker Image" "${IMAGE_NAME}" 44
+
+    Print_Text_With_Label "Shell into Container" "sudo docker exec -it ${CONTAINER_NAME} zsh"    
 
     # Run Container with X11 authentication and using same user in container and host
     # @link http://wiki.ros.org/docker/Tutorials/GUI#The_isolated_way
@@ -151,12 +196,12 @@
     #   * XSOCK and XAUTH only have ready access to the Host, instead of ready and write.
     sudo docker run --rm -it \
         --name="${CONTAINER_NAME}" \
-        --workdir="${HOST_SUBLIME_DIR}" \
-        --volume="${HOST_SUBLIME_CONFIG_DIR}":/home/"${USER}"/.config/sublime-text-3 \
-        --volume="$HOST_DEVELOPER_WORKSPACE":/home/"${USER}"/developer \
+        --workdir="${CONTAINER_WORKSPACE}" \
+        --volume="${HOST_SUBLIME_CONFIG_DIR}":/home/${CONTAINER_USER}/.config/sublime-text-3 \
+        --volume="$HOST_WORKSPACE":"${CONTAINER_WORKSPACE}" \
         --volume="${XSOCK}":"${XSOCK}":ro \
         --volume="${XAUTH}":"${XAUTH}":ro \
         --env="XAUTHORITY=${XAUTH}" \
         --env="DISPLAY" \
-        --user="${USER}" \
+        --user="${CONTAINER_USER}" \
         "${IMAGE_NAME}"

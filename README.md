@@ -47,32 +47,51 @@ bash -c "$(wget  https://gitlab.com/exadra37-docker/sublime-text-3/raw/master/se
 
 ## How To Use Sublime Text 3 Docker Container
 
-By default the Sublime Text build is `3126` and the Sublime Text will persist settings, cache and installed packages in
-dir `/home/$USER/.docker-sublime`.
+Sublime Text will persist settings, cache and installed packages in the Container dir `/home/$USER/.docker-sublime` that is mapped into the host dir `/home/$USER/.config/sublime-text-3`. Meaning that changes done inside the Container will be available in the host and vice versa.
 
-The default Host dir shared with the Sublime Text Container is `/home/$USER/Developer`, that we can override at any time.
+#### Defaults
 
-
-#### Run With Defaults
-
-```bash
-sublime
-```
+* The Sublime Text build is `3126`. Any other build of Sublime can be used to build a local Docker Image.
+* The image used `exadra37/sublime-textt-3` is pulled from Docker Hub. A local one can be build or another one can be pulled from Docker Hub.
+* The Host dir shared with the Sublime Text Container is the current dir as per `$PWD` variable. Another dir can be provided.
 
 #### See Help
 
 Check how to use it at any time...
 
-
 ```bash
 sublime -h
 ```
 
-#### Run With Other Build
+#### Run With Defaults
+
+The image used is the one in Docker Hub and the current dir `$PWD`, without the part `/home/$USER` is mapped to same path on the container.
+
+```bash
+sublime
+```
+
+#### Run With Another Docker Hub Image
+
+Personalize the current Docker Hub `exadra37/sublime-text-3` by extending it and then use it like...
+
+```bash
+sublime -i my-docker-hub-image-name
+```
+
+#### Run With Local Docker Image
+
+This will build locally, using the same Dockerfile used to build the Docker Hub Image...
+
+```bash
+sublime -l
+```
+
+#### Run With Another Build
 
 Currently the Sublime Text build defaults to `3126`.
 
-We can build the Docker Image with a previous or future build of Sublime Text, just by providing a different build number...
+We can build a local Docker Image with a previous or future build of Sublime Text, just by providing a different build number...
 
 ```bash
 sublime -b 3124
@@ -80,27 +99,26 @@ sublime -b 3124
 
 #### Run With Custom Developer Workspace
 
-By default `/home/$USER/Developer/Workspace` on Host is mapped to Container `/home/$USER/Developer`, but we can change the path
- in the Host we want to map into the Container, like:
+Instead of mapping the current dir as the host workspace, another one can be provided...
 
 ```bash
-sublime -d /absolute/path/in/host
+sublime -w /absolute/workspace/path/in/host
 ```
 
-#### Rebuild Docker Image
+#### Rebuild Local Docker Image
 
-To have the Ubuntu inside the Docker Image up to date we should rebuild the image every week.
+To rebuild the local image just do like...
 
 ```bash
 sublime -r
 ```
 
-#### How to Debug Sublime Text Docker Container
+#### How to Obtain a Shell Inside Sublime Text Docker Container
 
 For trouble shouting Sublime Text 3 installation we may need to go inside the docker container.
 
-To help us on that, when starting the container the exact command will be printed:
+To help us on that, when starting the container the exact command will be printed, and will look like:
 
 ```bash
-sudo docker exec -it ST3_1486504665 bash
+sudo docker exec -it ST3_1486504665 zsh
 ```
