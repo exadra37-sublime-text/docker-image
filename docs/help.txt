@@ -19,6 +19,8 @@ Parameter   Values                  Default Value                       Descript
 
 -b          3124, 3126, etc.        3126                                The Sublime Text build number. This default value is set on Dockerfile.
 -i          image_name:version      exadra37/sublime-text-3             The image name to use to build Sublime. If no image name is given default one is used.
+-l                                  exadra37/st3-local                  This option will build a local docker image with name `exadra37/st3-local`.
+-p          php, python, rust       basic                               Allows to build a profile for each language or use case, where we can personalize the installed packages and settings.
 -r          rebuild, pull                                               Rebuilds the local Docker Image or pulls a new one from Docker Hub.
 -w          /path/to/workspace      The current dir as per $PWD var     The absolute path to your projects.
 -h                                                                      Show this help.

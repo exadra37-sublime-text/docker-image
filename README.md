@@ -10,26 +10,6 @@ The motivation to create this package come from the burn of reinstalling my Deve
 So this package is the first of a series of other packages to make my Development environment very portable, easy and fast to
 install in any computer.
 
-## How To Use From Docker Hub
-
-The recommend way is to build the image locally with bash interface `sublime`. See instructions [here](how-to-install-sublime-text-3-docker-cli).
-
-This will map the current folder in the HOST to folder `developer` inside the Container.
-
-
-#### Download script to run the Docker Container
-
-```bash
-$ curl -OL https://gitlab.com/exadra37-docker/sublime-text-3/raw/master/src/docker-hub.sh && chmod ug+x docker-hub.sh
-```
-
-#### Run Sublime Text 3 from a Docker Container
-
-```
-$ ./docker-hub.sh
-```
-
-**NOTE:** The preferable method is to use the **Sublime Docker CLI** to build the image locally and run it.
 
 ## How To Install Sublime Text 3 Docker CLI
 
@@ -47,10 +27,11 @@ bash -c "$(wget  https://gitlab.com/exadra37-docker/sublime-text-3/raw/master/se
 
 ## How To Use Sublime Text 3 Docker Container
 
-Sublime Text will persist settings, cache and installed packages in the Container dir `/home/$USER/.docker-sublime` that is mapped into the host dir `/home/$USER/.config/sublime-text-3`. Meaning that changes done inside the Container will be available in the host and vice versa.
+Sublime Text will persist settings, cache and installed packages in the Container dir `/home/$USER/.dockerize/sublime-text-3/profiles/profile-name` that is mapped into the host dir `/home/$USER/.config/sublime-text-3`. Meaning that changes done inside the Container will be available in the host and vice versa.
 
 #### Defaults
 
+* The default profile is `basic`, but other ones can be created for each use case or programming language.
 * The Sublime Text build is `3126`. Any other build of Sublime can be used to build a local Docker Image.
 * The image used `exadra37/sublime-textt-3` is pulled from Docker Hub. A local one can be build or another one can be pulled from Docker Hub.
 * The Host dir shared with the Sublime Text Container is the current dir as per `$PWD` variable. Another dir can be provided.
@@ -65,11 +46,22 @@ sublime -h
 
 #### Run With Defaults
 
-The image used is the one in Docker Hub and the current dir `$PWD`, without the part `/home/$USER` is mapped to same path on the container.
+The image used is the one in Docker Hub and the current dir `$PWD`, without the part `/home/$USER` is mapped to same path on the container and using the default profile `baisc`.
 
 ```bash
 sublime
 ```
+
+#### Run With Another Profile
+
+This will create a new profile called `php` in `/home/$USER/.dockerize/sublime-text-3/profiles/php`. Now you can install packages and customize settings just for this PHP profile.
+
+```bash
+sublime -p php
+```
+
+So each time we want to launch Sublime optimized to work on PHP projects we just run the same command used above.
+
 
 #### Run With Another Docker Hub Image
 

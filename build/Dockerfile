@@ -55,11 +55,11 @@ RUN apt-get update && \
         # Localization
         locale-gen en_GB.UTF-8 && \
 
-        #Add new sudo user
-        useradd -m -u ${CONTAINER_UID} -s /usr/bin/zsh ${CONTAINER_USER} && \
-
         # Intall Oh My Zsh for root user
         bash -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)" && \
+
+        # Add new user
+        useradd -m -u ${CONTAINER_UID} -s /usr/bin/zsh ${CONTAINER_USER} && \
 
         # Intall Oh My Zsh for user
         su "${CONTAINER_USER}" -c 'bash -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"' && \
@@ -68,14 +68,19 @@ RUN apt-get update && \
         curl -O https://download.sublimetext.com/sublime-text_build-"${SUBLIME_BUILD}"_amd64.deb && \
         dpkg -i -R sublime-text_build-"${SUBLIME_BUILD}"_amd64.deb || echo "\n Will force install of missing ST3 dependencies...\n" && \
 
+        # Create default dirs in User home directory necessary for Sublime
+        su "${CONTAINER_USER}" -c 'bash -c "mkdir -p ~/.local/share ~/.config/sublime-text-3/{Cache,Local,Index,Packages,Installed\ Packages}"' && \
+
         # Force installation of missing dependencies for Sublime
         apt-get -y -f install && \
         rm -rvf sublime-text_build-"${SUBLIME_BUILD}"_amd64.deb && \
 
         # Cleanup
-        rm -rf /var/lib/apt/lists/* 
+        rm -rf /var/lib/apt/lists/*
 
 USER ${CONTAINER_USER}
+
+WORKDIR /home/${CONTAINER_USER}
 
 # Run Sublime
 CMD ["/opt/sublime_text/sublime_text", "-w"]
