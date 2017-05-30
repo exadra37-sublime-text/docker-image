@@ -11,6 +11,7 @@
 # @link    Linkedin: https://uk.linkedin.com/in/exadra37
 # @link    Twitter:  https://twitter.com/Exadra37
 
+set -e
 
 ########################################################################################################################
 # Functions
@@ -30,7 +31,7 @@
         [ -z $( sudo docker images -q "${image_name}" ) ] && return 0 || return 1
     }
 
-    function Build_Docker_Image()
+    function Build_Local_Docker_Image()
     {
         local image_name="${1}"
 
@@ -74,19 +75,25 @@
 
         local script_path="${4}"
 
-        if [ "rebuild" == "${image_action}" ]
+        # We may want to use this action to:
+        #   - force an update of Ubuntu to keep security up to date.
+        #   - reflect last changes in the Dockerfile .
+        if [ "rebuild-local-image" == "${image_action}" ]
             then
                 Remove_Docker_Image "${image_name}"
         fi
 
-        if [ "pull" == "${image_action}" ]
+        # Keeps our Docker Image from Docker Hub updated to benefit from:
+        #   - security updates
+        #   - last changes on Dockerfile
+        if [ "pull-from-docker-hub" == "${image_action}" ]
             then
                 Pull_Docker_Image "${image_name}"
         fi
 
-        if [ "pull" != "${image_action}" ] && Is_Not_Present_Docker_Image "${image_name}"
+        if [ "pull-from-docker-hub" != "${image_action}" ] && Is_Not_Present_Docker_Image "${image_name}"
             then
-                Build_Docker_Image "${image_name}" "${sublime_build}" "${script_path}"
+                Build_Local_Docker_Image "${image_name}" "${sublime_build}" "${script_path}"
         fi
     }
 
@@ -114,34 +121,34 @@
 
 
 ########################################################################################################################
-# Variables
+# Variables Defaults
 ########################################################################################################################
 
     SCRIPT_PATH=$(dirname $(readlink -f $0))
 
     TIMESTAMP=$( date +"%s" )
 
+    IMAGE_NAME="exadra37/sublime-text-3"
+
+    IMAGE_ACTION="pull-from-docker-hub"
+
     CONTAINER_USER="sublime"
 
     CONTAINER_NAME="ST3_${TIMESTAMP}"
 
-    # Where to persist Sublime settings, cache and installed packages.
+    # The base Dir to persist Sublime profiles with their associated settings, cache and installed packages.
     HOST_SUBLIME_DIR=/home/"${USER}"/.dockerize/sublime-text-3
-
-
-########################################################################################################################
-# Arguments
-########################################################################################################################
 
     HOST_WORKSPACE="${PWD}"
 
     SUBLIME_BUILD="3126"
 
-    IMAGE_NAME="exadra37/sublime-text-3"
-
-    IMAGE_ACTION="pull"
-
     PROFILE="basic"
+
+
+########################################################################################################################
+# Arguments
+########################################################################################################################
 
     while getopts ':b:i:lp:rw:h' flag; do
       case "${flag}" in
@@ -149,13 +156,18 @@
         i) IMAGE_NAME="${OPTARG}"; IMAGE_ACTION="pull"; CONTAINER_USER="sublime"; ;;
         l) IMAGE_NAME="exadra37/st3-local"; IMAGE_ACTION=""; CONTAINER_USER="${USER}"; ;;
         p) PROFILE="${OPTARG}" ;;
-        r) IMAGE_ACTION="rebuild"; IMAGE_NAME="exadra37/st3-local"; CONTAINER_USER="${USER}"; ;;
+        r) IMAGE_ACTION="rebuild-local-image"; IMAGE_NAME="exadra37/st3-local"; CONTAINER_USER="${USER}"; ;;
         w) HOST_WORKSPACE="${OPTARG}" ;;
         h) cat "${SCRIPT_PATH}"/../docs/help.txt; exit 0; ;;
         \?) Print_Text_With_Label "ERROR" "option -${OPTARG} is not supported." 41; exit 1 ;;
         :) Print_Text_With_Label "ERROR" "option -${OPTARG} requires a value."; exit 1 ;;
       esac
     done
+
+
+########################################################################################################################
+# Assignments
+########################################################################################################################
 
     HOST_SUBLIME_DIR="${HOST_SUBLIME_DIR}/profiles/${PROFILE}"
     CONTAINER_DIR="${HOST_WORKSPACE#*${USER}/}"
@@ -174,6 +186,7 @@
     SUBLIME_INDEX_DIR="${HOST_SUBLIME_DIR}/.workspace/${WORKSPACE_DIR}/${INDEX_DIR}"
     SUBLIME_CACHE_DIR="${HOST_SUBLIME_DIR}/.workspace/${WORKSPACE_DIR}/${CACHE_DIR}"
 
+
 ########################################################################################################################
 # Validations
 ########################################################################################################################
@@ -185,13 +198,12 @@
     Create_Folder_If_Not_Exists "${SUBLIME_INDEX_DIR}"
     Create_Folder_If_Not_Exists "${SUBLIME_CACHE_DIR}"
 
+
 ########################################################################################################################
 # Execution
 ########################################################################################################################
 
     Perform_Docker_Image_Action "${IMAGE_ACTION}" "${IMAGE_NAME}" "${SUBLIME_BUILD}" "${SCRIPT_PATH}"
-
-    Print_Text_With_Label "WORKSPACE MAP" "${HOST_WORKSPACE}:${CONTAINER_WORKSPACE}" 40
 
     # Setup X11 server authentication
     # @link http://wiki.ros.org/docker/Tutorials/GUI#The_isolated_way
@@ -199,6 +211,8 @@
     XAUTH="${HOST_SUBLIME_DIR}"/.docker.xauth
     touch "${XAUTH}"
     xauth nlist "${DISPLAY}" | sed -e 's/^..../ffff/' | xauth -f "${XAUTH}" nmerge -
+
+    Print_Text_With_Label "WORKSPACE MAP" "${HOST_WORKSPACE}:${CONTAINER_WORKSPACE}" 40
 
     Print_Text_With_Label "Using Docker Image" "${IMAGE_NAME}" 44
 
