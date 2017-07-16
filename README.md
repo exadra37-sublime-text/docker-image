@@ -8,10 +8,13 @@ Another benefit is to be able to try different Sublime Text builds, with differe
 The motivation to create this package come from the burn of reinstalling my Development environment across several computers each time I install/upgrade an OS or change computer.
 
 So this package is the first of a series of other packages to make my Development environment very portable, easy and fast to
-install in any computer.
+use in any computer by running them from inside a Docker Container.
 
 
 ## How To Install Sublime Text 3 Docker CLI
+
+The Sublime CLI is installed in `/home/bin/$USER/.vendor/exadra37-docker/sublime-text-3` and a symlink is pointing to it is created in `/home/$USER/bin`, so that we can access it just by typing `sublime`.
+
 
 #### Using CURL in command line:
 
@@ -46,7 +49,9 @@ sublime -h
 
 #### Run With Defaults
 
-The image used is the one in Docker Hub and the current dir `$PWD`, without the part `/home/$USER` is mapped to same path on the container and using the default profile `baisc`.
+The image used is the one in Docker Hub and the the workspace is the current dir `$PWD` that is mapped to same path on container.
+
+Running with defaults it will use the profile `basic`, that can be found in `/home/$USER/.dockerize/sublime-text-3/profiles`.
 
 ```bash
 sublime
@@ -65,7 +70,7 @@ So each time we want to launch Sublime optimized to work on PHP projects we just
 
 #### Run With Another Docker Hub Image
 
-Personalize the current Docker Hub `exadra37/sublime-text-3` by extending it and then use it like...
+Personalize the current Docker Hub image `exadra37/sublime-text-3` by extending it and then use it like...
 
 ```bash
 sublime -i my-docker-hub-image-name

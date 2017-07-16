@@ -35,20 +35,26 @@ set -e
     {
         local image_name="${1}"
 
-        local sublime_build="${2}"
+        local profile="${2}"
 
-        local script_path="${3}"
+        local container_user="${3}"
+
+        local sublime_build="${4}"
+
+        local build_path="${5}"
 
         local uid=$( id -u )
 
         local gid=$( id -g )
 
+        Print_Text_With_Label "Build Local Image From" "${build_path}"
+
         sudo docker build \
-                    --build-arg CONTAINER_USER="${USER}" \
+                    --build-arg CONTAINER_USER="${container_user}" \
                     --build-arg CONTAINER_UID="${uid}" \
                     --build-arg SUBLIME_BUILD="${sublime_build}" \
-                    -t "${image_name}:latest" \
-                    "${script_path}"/../build
+                    -t "${image_name}" \
+                    "${build_path}"
     }
 
     function Remove_Docker_Image()
@@ -71,9 +77,13 @@ set -e
 
         local image_name="${2}"
 
-        local sublime_build="${3}"
+        local container_user="${3}"
 
-        local script_path="${4}"
+        local profile="${4}"
+
+        local sublime_build="${5}"
+
+        local build_path="${6}"
 
         # We may want to use this action to:
         #   - force an update of Ubuntu to keep security up to date.
@@ -93,8 +103,36 @@ set -e
 
         if [ "pull-from-docker-hub" != "${image_action}" ] && Is_Not_Present_Docker_Image "${image_name}"
             then
-                Build_Local_Docker_Image "${image_name}" "${sublime_build}" "${script_path}"
+                Build_Local_Docker_Image "${image_name}" "${profile}" "${container_user}" "${sublime_build}" "${build_path}"
         fi
+    }
+
+    function Git_Pull_Profile()
+    {
+        local _profile_path="${1}"
+
+        cd "${_profile_path}"
+
+        git pull
+
+        cd -
+    }
+
+    function Git_Pull_Profile()
+    {
+        local _profile_path="${1}"
+
+        local _datetime="$( date )"
+
+        cd "${_profile_path}"
+
+        git add -A
+
+        git commit -am "Auto Tracking changes to profile by ${USER} on ${_datetime}."
+
+        git push origin master
+
+        cd -
     }
 
     function Print_Text_With_Label()
@@ -124,6 +162,8 @@ set -e
 # Variables Defaults
 ########################################################################################################################
 
+    PROFILE="basic"
+
     SCRIPT_PATH=$(dirname $(readlink -f $0))
 
     TIMESTAMP=$( date +"%s" )
@@ -136,6 +176,16 @@ set -e
 
     CONTAINER_NAME="ST3_${TIMESTAMP}"
 
+    # like `/this/script/path/../vendor/exadra37/sublime-text-3`
+    # The last bit will be added later when we know the Profile we want to use
+    BUILD_PATH="${SCRIPT_PATH}/../vendor/${USER}/sublime-text-3"
+    PROFILE_PATH="${SCRIPT_PATH}/../vendor/${USER}/sublime-text-3"
+
+    # If the local docker image doesn't exist we will try to create it from ${BUILD_PATH}
+    # image name like `exadra37/st3-local-basic:latest`
+    #LOCAL_IMAGE_NAME="${USER}/st3-local"
+    BUILD_LOCAL_IMAGE="false"
+
     # The base Dir to persist Sublime profiles with their associated settings, cache and installed packages.
     HOST_SUBLIME_DIR=/home/"${USER}"/.dockerize/sublime-text-3
 
@@ -143,48 +193,97 @@ set -e
 
     SUBLIME_BUILD="3126"
 
-    PROFILE="basic"
-
-
-########################################################################################################################
-# Arguments
-########################################################################################################################
-
-    while getopts ':b:i:lp:rw:h' flag; do
-      case "${flag}" in
-        b) SUBLIME_BUILD="${OPTARG}"; IMAGE_ACTION="rebuild"; CONTAINER_USER="${USER}"; ;;
-        i) IMAGE_NAME="${OPTARG}"; IMAGE_ACTION="pull"; CONTAINER_USER="sublime"; ;;
-        l) IMAGE_NAME="exadra37/st3-local"; IMAGE_ACTION=""; CONTAINER_USER="${USER}"; ;;
-        p) PROFILE="${OPTARG}" ;;
-        r) IMAGE_ACTION="rebuild-local-image"; IMAGE_NAME="exadra37/st3-local"; CONTAINER_USER="${USER}"; ;;
-        w) HOST_WORKSPACE="${OPTARG}" ;;
-        h) cat "${SCRIPT_PATH}"/../docs/help.txt; exit 0; ;;
-        \?) Print_Text_With_Label "ERROR" "option -${OPTARG} is not supported." 41; exit 1 ;;
-        :) Print_Text_With_Label "ERROR" "option -${OPTARG} requires a value."; exit 1 ;;
-      esac
-    done
-
-
-########################################################################################################################
-# Assignments
-########################################################################################################################
-
-    HOST_SUBLIME_DIR="${HOST_SUBLIME_DIR}/profiles/${PROFILE}"
-    CONTAINER_DIR="${HOST_WORKSPACE#*${USER}/}"
-    CONTAINER_WORKSPACE="/home/${CONTAINER_USER}/${CONTAINER_DIR}"
-    WORKSPACE_DIR="${CONTAINER_DIR//\//_}"
-
     INSTALL_PACKAGES_DIR=".config/sublime-text-3/Installed Packages"
     PACKAGES_DIR=".config/sublime-text-3/Packages"
     LOCAL_DIR=".config/sublime-text-3/Local"
     INDEX_DIR=".config/sublime-text-3/Index"
     CACHE_DIR=".config/sublime-text-3/Cache"
 
-    SUBLIME_INSTALL_PACKAGES_DIR="${HOST_SUBLIME_DIR}/${INSTALL_PACKAGES_DIR}"
-    SUBLIME_PACKAGES_DIR="${HOST_SUBLIME_DIR}/${PACKAGES_DIR}"
+    DETACHED_MODE="-d"
+
+    # Use the env file to override any of the above defaults
+    ENV_FILE="${SCRIPT_PATH}/../.dockerize-sublime.env.sh"
+    [ -f "${ENV_FILE}" ] && source "${ENV_FILE}"
+
+
+########################################################################################################################
+# Arguments
+########################################################################################################################
+
+    while getopts ':b:di:lp:rw:h' flag; do
+      case "${flag}" in
+        b) SUBLIME_BUILD="${OPTARG}"; IMAGE_ACTION="rebuild"; ;;
+        d) DETACHED_MODE=""; ;;
+        i) IMAGE_NAME="${OPTARG}"; IMAGE_ACTION="pull-from-docker-hub"; ;;
+        l) BUILD_LOCAL_IMAGE="true"; ;;
+        p) PROFILE="${OPTARG}"; ;;
+        r) IMAGE_ACTION="rebuild-local-image"; IMAGE_NAME="${LOCAL_IMAGE_NAME}-${PROFILE}:latest"; ;;
+        w) HOST_WORKSPACE="${OPTARG}"; ;;
+        h) cat "${SCRIPT_PATH}"/../docs/help.txt; exit 0; ;;
+        \?) Print_Text_With_Label "ERROR" "option -${OPTARG} is not supported." 41; exit 1 ;;
+        :) Print_Text_With_Label "ERROR" "option -${OPTARG} requires a value." 41; exit 1 ;;
+      esac
+    done
+
+    if [ "true" == "${BUILD_LOCAL_IMAGE}" ]
+        then
+
+            IMAGE_NAME="${USER}/st3-local-${PROFILE}:latest"
+            IMAGE_ACTION=""
+    fi
+
+
+########################################################################################################################
+# Sublime Profiles Assignments
+########################################################################################################################
+#
+# By default this CLI creates a Sublime CLI Profile named `basic`.
+#
+# Use CLI Profiles to help with creating different Sublime configurations for each language you work with or for each
+#  scenario you may want to have a different setup.
+#
+
+    # like `/this/script/path/../venhome/dor/exadra37/sublime-text-3-basic/build`
+    BUILD_PATH="${BUILD_PATH}/${PROFILE}-docker-image/build"
+    PROFILE_PATH="${PROFILE_PATH}/${PROFILE}-profile/src"
+
+    # like `/home/$USER/.dockerize/sublime-text-3/profiles/basic`
+    HOST_SUBLIME_DIR="${HOST_SUBLIME_DIR}/profiles/${PROFILE}"
+
+    # from `/home/$USER/Developer/Repos` we will get `Developer/Repos`
+    CONTAINER_DIR="${HOST_WORKSPACE#*${USER}/}"
+
+    # like `/home/sublime/Developer/Repos`
+    CONTAINER_WORKSPACE="/home/${CONTAINER_USER}/${CONTAINER_DIR}"
+
+    # from `Developer/Repos` we get `Developer_Repos`
+    WORKSPACE_DIR="${CONTAINER_DIR//\//_}"
+
+    # like `/home/$USER/.dockerize/sublime-text-3/profiles/basic/.config/sublime-text-3/Install Packages`
+    #SUBLIME_INSTALL_PACKAGES_DIR="${HOST_SUBLIME_DIR}/${INSTALL_PACKAGES_DIR}"
+    SUBLIME_INSTALL_PACKAGES_DIR="${PROFILE_PATH}/Installed Packages"
+
+    # like `/home/$USER/.dockerize/sublime-text-3/profiles/basic/.config/sublime-text-3/Packages`
+    #SUBLIME_PACKAGES_DIR="${HOST_SUBLIME_DIR}/${PACKAGES_DIR}"
+    SUBLIME_PACKAGES_DIR="${PROFILE_PATH}/Packages"
+
+    # Normally Sublime stores everything in `/home/$USER/.config/sublime-text-3`, but once in a Docker Container we
+    #  only map from the host the dir we want ot work on, then Sublime Cache, Index and Local folders can't be stored in
+    #  same place or we will see Sublime get confused with the Cache mechanism and other stuff...
+    #
+    # Separating this Sublime folders in a per workspace basis will allow Sublime to know the Cache, Index and Local stuff
+    #  for each workpace we map.
+    #
+    # like `/home/$USER/.dockerize/sublime-text-3/profiles/basic/.workspace/Developer_Repos/Local`
     SUBLIME_LOCAL_DIR="${HOST_SUBLIME_DIR}/.workspace/${WORKSPACE_DIR}/${LOCAL_DIR}"
     SUBLIME_INDEX_DIR="${HOST_SUBLIME_DIR}/.workspace/${WORKSPACE_DIR}/${INDEX_DIR}"
     SUBLIME_CACHE_DIR="${HOST_SUBLIME_DIR}/.workspace/${WORKSPACE_DIR}/${CACHE_DIR}"
+
+    SUBLIME_LOCAL_DIR_MAP="${SUBLIME_LOCAL_DIR}:/home/${CONTAINER_USER}/${LOCAL_DIR}"
+    SUBLIME_INDEX_DIR_MAP="${SUBLIME_INDEX_DIR}":"/home/${CONTAINER_USER}/${INDEX_DIR}"
+    SUBLIME_CACHE_DIR_MAP="${SUBLIME_CACHE_DIR}":"/home/${CONTAINER_USER}/${CACHE_DIR}"
+    SUBLIME_PACKAGES_DIR_MAP="${SUBLIME_PACKAGES_DIR}:/home/${CONTAINER_USER}/${PACKAGES_DIR}"
+    SUBLIME_INSTALL_PACKAGES_DIR_MAP="${SUBLIME_INSTALL_PACKAGES_DIR}:/home/${CONTAINER_USER}/${INSTALL_PACKAGES_DIR}"
 
 
 ########################################################################################################################
@@ -194,6 +293,7 @@ set -e
     Create_Folder_If_Not_Exists "${HOST_SUBLIME_DIR}"
     Create_Folder_If_Not_Exists "${SUBLIME_INSTALL_PACKAGES_DIR}"
     Create_Folder_If_Not_Exists "${SUBLIME_PACKAGES_DIR}"
+    Create_Folder_If_Not_Exists "${SUBLIME_PACKAGES_DIR}/User"
     Create_Folder_If_Not_Exists "${SUBLIME_LOCAL_DIR}"
     Create_Folder_If_Not_Exists "${SUBLIME_INDEX_DIR}"
     Create_Folder_If_Not_Exists "${SUBLIME_CACHE_DIR}"
@@ -203,7 +303,9 @@ set -e
 # Execution
 ########################################################################################################################
 
-    Perform_Docker_Image_Action "${IMAGE_ACTION}" "${IMAGE_NAME}" "${SUBLIME_BUILD}" "${SCRIPT_PATH}"
+    Perform_Docker_Image_Action "${IMAGE_ACTION}" "${IMAGE_NAME}" "${CONTAINER_USER}" "${PROFILE}" "${SUBLIME_BUILD}" "${BUILD_PATH}"
+
+    #Git_Pull_Profile "${PROFILE_PATH}"
 
     # Setup X11 server authentication
     # @link http://wiki.ros.org/docker/Tutorials/GUI#The_isolated_way
@@ -212,11 +314,28 @@ set -e
     touch "${XAUTH}"
     xauth nlist "${DISPLAY}" | sed -e 's/^..../ffff/' | xauth -f "${XAUTH}" nmerge -
 
-    Print_Text_With_Label "WORKSPACE MAP" "${HOST_WORKSPACE}:${CONTAINER_WORKSPACE}" 40
+    Print_Text_With_Label "Sublime Settings Dir" "${HOST_SUBLIME_DIR}" 40
+    Print_Text_With_Label "Sublime Local Dir Map" "${SUBLIME_LOCAL_DIR_MAP}" 40
+    Print_Text_With_Label "Sublime Index Dir Map" "${SUBLIME_INDEX_DIR_MAP}" 40
+    Print_Text_With_Label "Sublime Cache Dir Map" "${SUBLIME_CACHE_DIR_MAP}" 40
+    Print_Text_With_Label "Sublime Packages Dir Map" "${SUBLIME_PACKAGES_DIR_MAP}" 40
+    Print_Text_With_Label "Sublime Install Packages Dir Map" "${SUBLIME_INSTALL_PACKAGES_DIR_MAP}" 40
+    Print_Text_With_Label "Profile Path" "${PROFILE_PATH}" 40
+
+
+    Print_Text_With_Label "Workspace Map" "${HOST_WORKSPACE}:${CONTAINER_WORKSPACE}" 45
 
     Print_Text_With_Label "Using Docker Image" "${IMAGE_NAME}" 44
 
+
     Print_Text_With_Label "Shell into Container" "sudo docker exec -it ${CONTAINER_NAME} zsh"
+
+    if [ -z "${DETACHED_MODE}" ]
+        then
+            Print_Text "Container Output:\n" 33
+        else
+            Print_Text "Container ID:" 33
+    fi
 
     # Run Container with X11 authentication and using same user in container and host
     # @link http://wiki.ros.org/docker/Tutorials/GUI#The_isolated_way
@@ -226,18 +345,20 @@ set -e
     #   * I Also map my developer folder in the host to the container.
     #   * XSOCK and XAUTH only have ready access to the Host, instead of ready and write.
     #        --workdir="${CONTAINER_WORKSPACE}" \
-    sudo docker run --rm -it \
+    sudo docker run --rm -it ${DETACHED_MODE} \
         --name="${CONTAINER_NAME}" \
         --workdir="${CONTAINER_WORKSPACE}" \
         --volume="${HOST_WORKSPACE}":"${CONTAINER_WORKSPACE}" \
-        --volume="${SUBLIME_LOCAL_DIR}":"/home/${CONTAINER_USER}/${LOCAL_DIR}" \
-        --volume="${SUBLIME_INDEX_DIR}":"/home/${CONTAINER_USER}/${INDEX_DIR}" \
-        --volume="${SUBLIME_CACHE_DIR}":"/home/${CONTAINER_USER}/${CACHE_DIR}" \
-        --volume="${SUBLIME_PACKAGES_DIR}":"/home/${CONTAINER_USER}/${PACKAGES_DIR}" \
-        --volume="${SUBLIME_INSTALL_PACKAGES_DIR}":"/home/${CONTAINER_USER}/${INSTALL_PACKAGES_DIR}" \
+        --volume="${SUBLIME_LOCAL_DIR_MAP}" \
+        --volume="${SUBLIME_INDEX_DIR_MAP}" \
+        --volume="${SUBLIME_CACHE_DIR_MAP}" \
+        --volume="${SUBLIME_PACKAGES_DIR_MAP}" \
+        --volume="${SUBLIME_INSTALL_PACKAGES_DIR_MAP}" \
         --volume="${XSOCK}":"${XSOCK}":ro \
         --volume="${XAUTH}":"${XAUTH}":ro \
         --env="XAUTHORITY=${XAUTH}" \
         --env="DISPLAY" \
         --user=1000 \
         "${IMAGE_NAME}"
+
+    #Git_Push_Profile "${PROFILE_PATH}"

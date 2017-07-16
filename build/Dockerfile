@@ -2,7 +2,6 @@ FROM ubuntu:latest
 
 LABEL "com.exadra37.vendor"="Exadra37"
 LABEL com.exadra37.package-name="exadra37-sublime-text-3/docker-image"
-LABEL version="0.0.1.0"
 LABEL description="Dockerize Sublime Text 3. \
 This allow us to run the Sublime Text 3 from inside a Docker Container. \
 
@@ -18,13 +17,8 @@ Advantages: \
 # https://bugs.launchpad.net/ubuntu/+source/at-spi2-core/+bug/1193236
 ENV NO_AT_BRIDGE=1
 
-ENV LANG en_GB.UTF-8
-ENV LANGUAGE en_GB:en
-ENV LC_ALL en_GB.UTF-8
-ENV SHELL /bin/bash
-
 # Will not prompt for questions
-ARG DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 
 ARG CONTAINER_USER="${CONTAINER_USER:-sublime}"
 ARG CONTAINER_UID="${CONTAINER_UID:-1000}"
@@ -38,12 +32,12 @@ RUN apt-get update && \
         locales \
         ca-certificates \
         apt-utils \
+        inotify-tools \
         dbus-x11 \
         curl \
         git \
         zsh \
         python \
-        php \
         libcanberra-gtk-module \
         libgtk2.0-0 \
         libatk-adaptor \
@@ -54,6 +48,7 @@ RUN apt-get update && \
 
         # Localization
         locale-gen en_GB.UTF-8 && \
+        dpkg-reconfigure locales && \
 
         # Intall Oh My Zsh for root user
         bash -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)" && \
