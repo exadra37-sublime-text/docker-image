@@ -1,0 +1,25 @@
+{
+	"added_words":
+	[
+		"Middleware",
+		"exadra37",
+		"php"
+	],
+	"bold_folder_labels": true,
+	"color_scheme": "Packages/User/SublimeLinter/Monokai (Flake8Lint) (SL).tmTheme",
+	"ensure_newline_at_eof_on_save": true,
+	"font_size": 11.3,
+	"highlight_modified_tabs": true,
+	"ignored_packages":
+	[
+		"Vintage"
+	],
+	"rulers":
+	[
+		80
+	],
+	"show_encoding": true,
+	"spell_check": true,
+	"translate_tabs_to_spaces": true,
+	"trim_trailing_white_space_on_save": true
+}

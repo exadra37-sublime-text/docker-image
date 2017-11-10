@@ -1,0 +1,24 @@
+{
+	"bootstrapped": true,
+	"in_process_packages":
+	[
+	],
+	"installed_packages":
+	[
+		"DocBlockr",
+		"Dockerfile Syntax Highlighting",
+		"DotENV",
+		"Emmet",
+		"Jinja2",
+		"JSON Reindent",
+		"nginx",
+		"Package Control",
+		"Python Flake8 Lint",
+		"Python Improved",
+		"SFTP",
+		"SideBarEnhancements",
+		"SublimeLinter",
+		"SublimeLinter-php",
+		"SublimeLinter-phplint"
+	]
+}
