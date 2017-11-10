@@ -22,7 +22,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 ARG CONTAINER_USER="${CONTAINER_USER:-sublime}"
 ARG CONTAINER_UID="${CONTAINER_UID:-1000}"
-ARG SUBLIME_BUILD="${SUBLIME_BUILD:-3126}"
+ARG SUBLIME_BUILD="${SUBLIME_BUILD:-3143}"
 
 RUN apt-get update && \
     apt-get -y upgrade && \
@@ -37,6 +37,9 @@ RUN apt-get update && \
         curl \
         git \
         zsh \
+        nano \
+        vim \
+        php \
         python \
         libcanberra-gtk-module \
         libgtk2.0-0 \
@@ -72,6 +75,11 @@ RUN apt-get update && \
 
         # Cleanup
         rm -rf /var/lib/apt/lists/*
+
+ENV LANG en_GB.UTF-8
+ENV LANGUAGE en_GB:en
+ENV LC_ALL en_GB.UTF-8
+ENV SHELL /bin/bash
 
 USER ${CONTAINER_USER}
 

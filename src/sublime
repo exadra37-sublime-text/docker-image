@@ -191,7 +191,7 @@ set -e
 
     HOST_WORKSPACE="${PWD}"
 
-    SUBLIME_BUILD="3126"
+    SUBLIME_BUILD="3143"
 
     INSTALL_PACKAGES_DIR=".config/sublime-text-3/Installed Packages"
     PACKAGES_DIR=".config/sublime-text-3/Packages"
@@ -348,6 +348,7 @@ set -e
     sudo docker run --rm -it ${DETACHED_MODE} \
         --name="${CONTAINER_NAME}" \
         --workdir="${CONTAINER_WORKSPACE}" \
+        --volume="${HOME}/.ssh:/home/sublime/.ssh" \
         --volume="${HOST_WORKSPACE}":"${CONTAINER_WORKSPACE}" \
         --volume="${SUBLIME_LOCAL_DIR_MAP}" \
         --volume="${SUBLIME_INDEX_DIR_MAP}" \
