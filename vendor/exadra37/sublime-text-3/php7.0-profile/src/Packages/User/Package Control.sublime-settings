@@ -6,9 +6,13 @@
 	"installed_packages":
 	[
 		"DocBlockr",
+		"Docker Based Build Systems",
 		"Dockerfile Syntax Highlighting",
 		"DotENV",
+		"Elixir",
 		"Emmet",
+		"FileDiffs",
+		"GotoDocumentation",
 		"Jinja2",
 		"JSON Reindent",
 		"nginx",
@@ -19,6 +23,7 @@
 		"SideBarEnhancements",
 		"SublimeLinter",
 		"SublimeLinter-php",
-		"SublimeLinter-phplint"
+		"SublimeLinter-phplint",
+		"Xdebug Client"
 	]
 }

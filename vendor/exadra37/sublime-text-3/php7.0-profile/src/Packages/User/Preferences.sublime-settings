@@ -7,8 +7,9 @@
 	],
 	"bold_folder_labels": true,
 	"color_scheme": "Packages/User/SublimeLinter/Monokai (Flake8Lint) (SL).tmTheme",
+	"draw_indent_guides": true,
 	"ensure_newline_at_eof_on_save": true,
-	"font_size": 11.3,
+	"font_size": 12,
 	"highlight_modified_tabs": true,
 	"ignored_packages":
 	[

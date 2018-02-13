@@ -1,3 +1,12 @@
+# ***NOTE:***
+Because of reasons, I haven't been able to devote ~~much of~~ any time to supporting and maintaining my open source projects since late 2016. I'm not dead :skull:, dying :mask:, in prison :oncoming_police_car:, in exile :no_entry:, in space :alien:, hiding under a rock :mountain:, boycotting the interwebs :no_entry_sign: :computer:, or anything like that; life has just... been very busy :weary:. Hopefully I'll have more time for nerding in the not-too-distant future, but until then my development work will just have to remain more or less on hold, as unfortunately it doesn't pay any bills, provide any food, take care of my kids, or keep my car on the road. Of course, if anyone would like to donate to the cause, the link is below :moneybag:
+
+All the best,
+
+Matt
+
+---
+
 # Python Improved
 
 A better Python `.tmLanguage` syntax highlighting definition for [Sublime Text](http://www.sublimetext.com) and [TextMate](http://www.macromates.com). It includes support for both Python 2 and Python 3, and unlike any other Python syntax definition now fully supports Unicode identifiers anywhere in your code! It also provides its own improved regex syntax definition for inline highlighting of raw string literals.
@@ -65,12 +74,12 @@ def myfunc(self,            # gotta have self
 
 ## Issues
 
-If you have questions, concerns, or suggested improvements, I'd love to hear from you! Feel free to [open an issue](https://github.com/MattDMo/PythonImproved/issues/new) or send a [pull request](https://github.com/MattDMo/PythonImproved/compare/) and I'll get back to you as soon as I can. You can also email me at <mattdmo@pigimal.com> or find me on Twitter [@MattDMo](https://twitter.com/MattDMo).
+If you have questions, concerns, or suggested improvements, I'd love to hear from you! Feel free to [open an issue](https://github.com/MattDMo/PythonImproved/issues/new) or send a [pull request](https://github.com/MattDMo/PythonImproved/compare/) and I'll get back to you as soon as I can. You can also email me at <mattdmo@mattdmo.com> or find me on Twitter [@MattDMo](https://twitter.com/MattDMo).
 
 
 ## License
 
-&copy; 2013-2016 Matt Morrison <mattdmo@pigimal.com>.
+&copy; 2013-2018 Matt Morrison <mattdmo@mattdmo.com>.
 
 This is free software. It is licensed under the [MIT License](http://opensource.org/licenses/MIT). Feel free to use this in your own work. However, if you modify and/or redistribute it, please attribute me in some way, and distribute your work under this or a similar license. A shout-out or a beer would be appreciated.
 

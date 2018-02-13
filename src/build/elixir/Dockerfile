@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM elixir:1.4
 
 LABEL "com.exadra37.vendor"="Exadra37"
 LABEL com.exadra37.package-name="exadra37-sublime-text-3/docker-image"
@@ -20,9 +20,9 @@ ENV NO_AT_BRIDGE=1
 # Will not prompt for questions
 ENV DEBIAN_FRONTEND=noninteractive
 
-ARG CONTAINER_USER="${CONTAINER_USER:-sublime}"
-ARG CONTAINER_UID="${CONTAINER_UID:-1000}"
-ARG SUBLIME_BUILD="${SUBLIME_BUILD:-3143}"
+ARG CONTAINER_USER=elixir
+ARG CONTAINER_UID=1000
+ARG SUBLIME_BUILD=3143
 
 RUN apt-get update && \
     apt-get -y upgrade && \
@@ -38,8 +38,7 @@ RUN apt-get update && \
         git \
         zsh \
         nano \
-        vim \
-        php \
+        firefox \
         python \
         libcanberra-gtk-module \
         libgtk2.0-0 \

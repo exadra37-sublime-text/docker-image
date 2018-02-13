@@ -172,13 +172,12 @@ set -e
 
     IMAGE_ACTION="pull-from-docker-hub"
 
-    CONTAINER_USER="sublime"
-
     CONTAINER_NAME="ST3_${TIMESTAMP}"
 
     # like `/this/script/path/../vendor/exadra37/sublime-text-3`
     # The last bit will be added later when we know the Profile we want to use
-    BUILD_PATH="${SCRIPT_PATH}/../vendor/${USER}/sublime-text-3"
+    #BUILD_PATH="${SCRIPT_PATH}/../vendor/${USER}/sublime-text-3"
+    BUILD_PATH="${SCRIPT_PATH}/build"
     PROFILE_PATH="${SCRIPT_PATH}/../vendor/${USER}/sublime-text-3"
 
     # If the local docker image doesn't exist we will try to create it from ${BUILD_PATH}
@@ -201,7 +200,7 @@ set -e
 
     DETACHED_MODE="-d"
 
-    # Use the env file to override any of the above defaults
+    # UseCONTAINER_USER the env file to override any of the above defaults
     ENV_FILE="${SCRIPT_PATH}/../.dockerize-sublime.env.sh"
     [ -f "${ENV_FILE}" ] && source "${ENV_FILE}"
 
@@ -243,8 +242,11 @@ set -e
 #  scenario you may want to have a different setup.
 #
 
-    # like `/this/script/path/../venhome/dor/exadra37/sublime-text-3-basic/build`
-    BUILD_PATH="${BUILD_PATH}/${PROFILE}-docker-image/build"
+    CONTAINER_USER=${PROFILE}
+
+    # like `/this/script/path/../vendor/exadra37/sublime-text-3-basic/build`
+    # BUILD_PATH="${BUILD_PATH}/${PROFILE}-docker-image/build"
+    BUILD_PATH="${BUILD_PATH}/${PROFILE}"
     PROFILE_PATH="${PROFILE_PATH}/${PROFILE}-profile/src"
 
     # like `/home/$USER/.dockerize/sublime-text-3/profiles/basic`
@@ -347,8 +349,9 @@ set -e
     #        --workdir="${CONTAINER_WORKSPACE}" \
     sudo docker run --rm -it ${DETACHED_MODE} \
         --name="${CONTAINER_NAME}" \
+        --expose=5000 \
         --workdir="${CONTAINER_WORKSPACE}" \
-        --volume="${HOME}/.ssh:/home/sublime/.ssh" \
+        --volume="${HOME}/.ssh:/home/${CONTAINER_USER}/.ssh" \
         --volume="${HOST_WORKSPACE}":"${CONTAINER_WORKSPACE}" \
         --volume="${SUBLIME_LOCAL_DIR_MAP}" \
         --volume="${SUBLIME_INDEX_DIR_MAP}" \
