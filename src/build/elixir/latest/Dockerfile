@@ -1,4 +1,4 @@
-FROM elixir:1.4
+FROM elixir:latest
 
 LABEL "com.exadra37.vendor"="Exadra37"
 LABEL com.exadra37.package-name="exadra37-sublime-text-3/docker-image"
@@ -24,6 +24,13 @@ ARG CONTAINER_USER=elixir
 ARG CONTAINER_UID=1000
 ARG SUBLIME_BUILD=3143
 
+ARG LANGUAGE_CODE=en
+ARG COUNTRY_CODE=GB
+ARG ENCODING=UTF-8
+
+ARG LOCALE_STRING="${LANGUAGE_CODE}_${COUNTRY_CODE}"
+ARG LOCALIZATION="${LOCALE_STRING}.${ENCODING}"
+
 RUN apt-get update && \
     apt-get -y upgrade && \
 
@@ -38,7 +45,6 @@ RUN apt-get update && \
         git \
         zsh \
         nano \
-        firefox \
         python \
         libcanberra-gtk-module \
         libgtk2.0-0 \
@@ -48,15 +54,17 @@ RUN apt-get update && \
         # Force Install of missing dependencies
         apt-get -y -f install && \
 
-        # Localization
-        locale-gen en_GB.UTF-8 && \
-        dpkg-reconfigure locales && \
+        # Locales
+        echo "${LOCALIZATION} ${ENCODING}" > /etc/locale.gen && \
+        locale-gen "${LOCALIZATION}" && \
 
         # Intall Oh My Zsh for root user
         bash -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)" && \
 
         # Add new user
         useradd -m -u ${CONTAINER_UID} -s /usr/bin/zsh ${CONTAINER_USER} && \
+
+        cat /etc/passwd && \
 
         # Intall Oh My Zsh for user
         su "${CONTAINER_USER}" -c 'bash -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"' && \
@@ -75,9 +83,9 @@ RUN apt-get update && \
         # Cleanup
         rm -rf /var/lib/apt/lists/*
 
-ENV LANG en_GB.UTF-8
-ENV LANGUAGE en_GB:en
-ENV LC_ALL en_GB.UTF-8
+ENV LANG "${LOCALIZATION}"
+ENV LANGUAGE "${LOCALE_STRING}:${LANGUAGE_CODE}"
+ENV LC_ALL "${LOCALIZATION}"
 ENV SHELL /bin/bash
 
 USER ${CONTAINER_USER}

@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM exadra37/php7-dev-cli:7.0
 
 LABEL "com.exadra37.vendor"="Exadra37"
 LABEL com.exadra37.package-name="exadra37-sublime-text-3/docker-image"
@@ -20,29 +20,21 @@ ENV NO_AT_BRIDGE=1
 # Will not prompt for questions
 ENV DEBIAN_FRONTEND=noninteractive
 
-ARG CONTAINER_USER="${CONTAINER_USER:-sublime}"
-ARG CONTAINER_UID="${CONTAINER_UID:-1000}"
-ARG SUBLIME_BUILD="${SUBLIME_BUILD:-3143}"
+ARG CONTAINER_USER=php-fpm
+ARG CONTAINER_UID=1000
+ARG SUBLIME_BUILD=3143
+
+USER root
 
 RUN apt-get update && \
     apt-get -y upgrade && \
 
     # Install Required Dependencies
     apt-get -y install \
-        locales \
-        ca-certificates \
-        apt-utils \
-        inotify-tools \
         dbus-x11 \
-        curl \
-        git \
-        zsh \
-        nano \
-        php \
-        php-xdebug \
-        firefox \
+        firefox-esr \
         python \
-        libcanberra-gtk-module \
+        libcanberra-gtk3-module \
         libgtk2.0-0 \
         libatk-adaptor \
         libgail-common && \
@@ -50,26 +42,8 @@ RUN apt-get update && \
         # Force Install of missing dependencies
         apt-get -y -f install && \
 
-        echo "xdebug.remote_host = php" >> /etc/php/7.0/cli/conf.d/20-xdebug.ini && \
-        echo "xdebug.remote_enable = 1" >> /etc/php/7.0/cli/conf.d/20-xdebug.ini && \
-        echo "xdebug.remote_connect_back = 1" >> /etc/php/7.0/cli/conf.d/20-xdebug.ini && \
-
-        # Localization
-        locale-gen en_GB.UTF-8 && \
-        dpkg-reconfigure locales && \
-
-        # Intall Oh My Zsh for root user
-        bash -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)" && \
-
-        # Add new user
-        useradd -m -u ${CONTAINER_UID} -s /usr/bin/zsh ${CONTAINER_USER} && \
-
-        # Intall Oh My Zsh for user
-        su "${CONTAINER_USER}" -c 'bash -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"' && \
-
-        # Install Sublime
         curl -O https://download.sublimetext.com/sublime-text_build-"${SUBLIME_BUILD}"_amd64.deb && \
-        dpkg -i -R sublime-text_build-"${SUBLIME_BUILD}"_amd64.deb || echo "\n Will force install of missing ST3 dependencies...\n" && \
+        dpkg -i sublime-text_build-"${SUBLIME_BUILD}"_amd64.deb && \
 
         # Create default dirs in User home directory necessary for Sublime
         su "${CONTAINER_USER}" -c 'bash -c "mkdir -p ~/.local/share ~/.config/sublime-text-3/{Cache,Local,Index,Packages,Installed\ Packages}"' && \
@@ -81,14 +55,11 @@ RUN apt-get update && \
         # Cleanup
         rm -rf /var/lib/apt/lists/*
 
-ENV LANG en_GB.UTF-8
-ENV LANGUAGE en_GB:en
-ENV LC_ALL en_GB.UTF-8
-ENV SHELL /bin/bash
-
 USER ${CONTAINER_USER}
 
 WORKDIR /home/${CONTAINER_USER}
+
+ENTRYPOINT []
 
 # Run Sublime
 CMD ["/opt/sublime_text/sublime_text", "-w"]

@@ -50,6 +50,7 @@ set -e
         Print_Text_With_Label "Build Local Image From" "${build_path}"
 
         sudo docker build \
+                    --no-cache \
                     --build-arg CONTAINER_USER="${container_user}" \
                     --build-arg CONTAINER_UID="${uid}" \
                     --build-arg SUBLIME_BUILD="${sublime_build}" \
@@ -224,10 +225,23 @@ set -e
       esac
     done
 
+    IMAGE_TAG=${PROFILE##*:}
+
+
+    if [ "${PROFILE}" == "${IMAGE_TAG}" ]
+        then
+            IMAGE_TAG=latest
+        else
+            PROFILE=${PROFILE%:*}
+    fi
+
+    Print_Text_With_Label "PROFILE" ${PROFILE}
+    Print_Text_With_Label "IMAGE_TAG" ${IMAGE_TAG}
+
     if [ "true" == "${BUILD_LOCAL_IMAGE}" ]
         then
 
-            IMAGE_NAME="${USER}/st3-local-${PROFILE}:latest"
+            IMAGE_NAME="${USER}/st3-local-${PROFILE}:${IMAGE_TAG}"
             IMAGE_ACTION=""
     fi
 
@@ -246,7 +260,7 @@ set -e
 
     # like `/this/script/path/../vendor/exadra37/sublime-text-3-basic/build`
     # BUILD_PATH="${BUILD_PATH}/${PROFILE}-docker-image/build"
-    BUILD_PATH="${BUILD_PATH}/${PROFILE}"
+    BUILD_PATH="${BUILD_PATH}/${PROFILE}/${IMAGE_TAG}"
     PROFILE_PATH="${PROFILE_PATH}/${PROFILE}-profile/src"
 
     # like `/home/$USER/.dockerize/sublime-text-3/profiles/basic`
@@ -350,6 +364,7 @@ set -e
     sudo docker run --rm -it ${DETACHED_MODE} \
         --name="${CONTAINER_NAME}" \
         --expose=5000 \
+        --volume=/dev/shm:/dev/shm \
         --workdir="${CONTAINER_WORKSPACE}" \
         --volume="${HOME}/.ssh:/home/${CONTAINER_USER}/.ssh" \
         --volume="${HOST_WORKSPACE}":"${CONTAINER_WORKSPACE}" \
