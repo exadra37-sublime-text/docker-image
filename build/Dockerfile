@@ -40,7 +40,9 @@ RUN apt-get update && \
         nano \
         vim \
         php \
+        php-xdebug \
         python \
+        firefox \
         libcanberra-gtk-module \
         libgtk2.0-0 \
         libatk-adaptor \
