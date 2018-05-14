@@ -1,0 +1,13 @@
+<snippet>
+	<content><![CDATA[
+/**
+ * @author  Paulo Silva(Exadra37) 	<exadra37@gmail.com>
+ * @package ${1:vendor/name}
+ * @since   ${2:yyy-mm-dd}
+ */
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>cauthor</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<!-- <scope>source.python</scope> -->
+</snippet>

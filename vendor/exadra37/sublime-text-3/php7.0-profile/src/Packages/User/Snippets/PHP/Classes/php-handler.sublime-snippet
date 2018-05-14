@@ -1,0 +1,39 @@
+<snippet>
+	<content><![CDATA[
+php declare(strict_types = 1);
+
+namespace ${1:Vendor}\\${2:Package}\\Handlers\\${3:Resource}\\${4:Action};
+
+use Nn4m\\ImmutableValuesObject\\Values\\ResultValues;
+use ${1:Vendor}\\${2:Package}\\Logic\\${3:Resource}\\${4:Action}\\${4:Action}${3:Resource}Logic;
+use ${1:Vendor}\\${2:Package}\\Repository\\${3:Resource}\\${4:Action}\\${4:Action}${3:Resource}Repository;
+
+class ${4:Action}${3:Resource}Handler
+{
+	private \$logic;
+
+	private \$repository;
+
+	public function __construct(
+		${4:Action}${3:Resource}Logic \$logic,
+		${4:Action}${3:Resource}Repository \$repository
+	) {
+		\$this->logic = \$logic;
+		\$this->repository = \$repository;
+	}
+
+	public function ${4:Action}(${5:args}): ResultValues
+	{
+		\$status = 'success';
+		\$message = 'Successfully performed the action ${4:Action} on the resource ${3:Resource}.';
+		\$data = [];
+
+		return new ResultValues(\$status, \$message, \$data);
+	}
+}
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>php-handler</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<!-- <scope>source.php</scope> -->
+</snippet>

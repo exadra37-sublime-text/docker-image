@@ -1,0 +1,9 @@
+<snippet>
+	<content><![CDATA[
+echo '<hr><strong>${1:var}:</strong><pre>';var_dump(\$${1:var});echo '</pre><hr>';
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>vardump</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<!-- <scope>source.python</scope> -->
+</snippet>

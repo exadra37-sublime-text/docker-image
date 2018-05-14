@@ -1,0 +1,120 @@
+<snippet>
+	<content><![CDATA[
+namespace ${1:Vendor}\\${2:Package}\Controller;
+
+use ${3:Controller};
+use ${4:Config};
+use ${1:Vendor}\\${2:Package}\\Repository\\${5:Name}Repository;
+
+/**
+ * @author  Paulo Silva(Exadra37) 	     <exadra37@gmail.com>
+ * @package ${1:Vendor}\\${2:Package}
+ * @since   ${6:2015}/${7:01}/${8:31}
+ */
+
+class ${5:Name}Controller extends ${9:Controller}
+{
+    // defining properties that will contain an Object
+
+    protected \$${5:Name}Repository;
+
+	public function __construct(${5:Name}Repository \$repository)
+    {
+        \$this->${5:Name}Repository = \$repository;
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @param  string   \$client - rcode for the client like MC, DB, etc.
+     * @param  string   \$type   - output type like json, xml, etc.
+     * @return mixed             - Object or Array
+     */
+    public function index(\$client, \$type)
+    {
+
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @param  string   \$client - rcode for the client like MC, DB, etc.
+     * @param  string   \$type   - output type like json, xml, etc.
+     * @return mixed             - Object or Array
+     */
+    public function create(\$client, \$type)
+    {
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  string   \$client - rcode for the client like MC, DB, etc.
+     * @param  string   \$type   - output type like json, xml, etc.
+     * @return mixed             - Object or Array
+     */
+    public function store(\$client, \$type)
+    {
+
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  string   \$client - rcode for the client like MC, DB, etc.
+     * @param  int      \$id     - resource id
+     * @param  string   \$type   - output type like json, xml, etc.
+     * @return mixed             - Object or Array
+     */
+    public function show(\$client, \$id, \$type)
+    {
+
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  string   \$client - rcode for the client like MC, DB, etc.
+     * @param  int      \$id     - resource id
+     * @param  string   \$type   - output type like json, xml, etc.
+     * @return mixed             - Object or Array
+     */
+    public function edit(\$client, \$id, \$type)
+    {
+
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  string   \$client - rcode for the client like MC, DB, etc.
+     * @param  int      \$id     - resource id
+     * @param  string   \$type   - output type like json, xml, etc.
+     * @return mixed             - Object or Array
+     */
+    public function update(\$client, \$id, \$type)
+    {
+
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  string   \$client - rcode for the client like MC, DB, etc.
+     * @param  int      \$id     - resource id
+     * @param  string   \$type   - output type like json, xml, etc.
+     * @return mixed             - Object or Array
+     */
+    public function destroy(\$client, \$id, \$type)
+    {
+
+    }
+
+}
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>l4controller</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<!-- <scope>source.python</scope> -->
+</snippet>

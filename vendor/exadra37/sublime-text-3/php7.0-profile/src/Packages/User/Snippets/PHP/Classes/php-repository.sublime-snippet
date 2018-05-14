@@ -1,0 +1,34 @@
+<snippet>
+	<content><![CDATA[
+php declare(strict_types = 1);
+
+namespace ${1:Vendor}\\${2:Package}\\Repositories\\${3:Resource}\\${4:Action};
+
+use Nn4m\\ImmutableValuesObject\\Values\\ResultValues;
+use ${1:Vendor}\\${2:Package}\\Model\\${3:Resource}Model;
+
+class ${4:Action}${3:Resource}Repository
+{
+	private \$model;
+
+	public function __construct(
+		${3:Resource}Model \$model
+	) {
+		\$this->model = \$model;
+	}
+
+	public function ${4:Action}(${5:args}): ResultValues
+	{
+		\$status = 'success';
+		\$message = 'Successfully performed the action ${4:Action} on the resource ${3:Resource}.';
+		\$data = [];
+
+		return new ResultValues(\$status, \$message, \$data);
+	}
+}
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>php-repository</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<!-- <scope>source.php</scope> -->
+</snippet>

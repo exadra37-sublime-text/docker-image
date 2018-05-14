@@ -1,0 +1,9 @@
+<snippet>
+    <content><![CDATA[
+        echo "\n\n-> Class Methods: \n";print_r(get_class_methods(\$this)); echo "\n\n";die;
+]]></content>
+    <!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+    <tabTrigger>tgcm</tabTrigger>
+    <!-- Optional: Set a scope to limit where the snippet will trigger -->
+    <!-- <scope>source.python</scope> -->
+</snippet>

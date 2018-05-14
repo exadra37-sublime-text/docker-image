@@ -1,0 +1,35 @@
+<snippet>
+	<content><![CDATA[
+<?php namespace ${1:Vendor}\\${2:Package}\\${3:Path};
+
+use ${4:Response}, ${5:File}, ${6:Controller}, ${7:Cache}, ${8:DB};
+
+/**
+ *
+ * @author  Paulo Silva(Exadra37) 	psilva@nn4m.com
+ * @package ${9:Vendor}/${10:Package}
+ * @version 0.0.1
+ * @since   ${11:dd.mm.yy}
+ *
+ */
+
+class ${12:ClassName} extends ${13:ClassToExtend} 
+{
+	protected \$errors;
+
+	public function __construct()
+	{
+
+	}
+
+	public function __destruct()
+	{
+
+	}
+}
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>l4class</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<!-- <scope>source.python</scope> -->
+</snippet>

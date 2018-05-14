@@ -1,0 +1,48 @@
+{
+	"bootstrapped": true,
+	"in_process_packages":
+	[
+	],
+	"installed_packages":
+	[
+		"Alignment",
+		"Blade Snippets",
+		"CSS Format",
+		"DocBlockr",
+		"Docker Based Build Systems",
+		"Dockerfile Syntax Highlighting",
+		"DotENV",
+		"FileDiffs",
+		"FileIcons",
+		"FileManager",
+		"Fold Comments",
+		"Git blame",
+		"GitGutter",
+		"GotoDocumentation",
+		"HTML-CSS-JS Prettify",
+		"HTMLBeautify",
+		"Hugofy",
+		"IndentX",
+		"Laravel Blade Highlighter",
+		"Local History",
+		"Minifier",
+		"nginx",
+		"Package Control",
+		"PHP Companion",
+		"Phpcs",
+		"PhpSimpleRefactor",
+		"Pretty JSON",
+		"RawLineEdit",
+		"StringUtilities",
+		"SublimeGit",
+		"SublimeLinter",
+		"SublimeLinter-php",
+		"SublimeLinter-phpcs",
+		"Sublimerge 3",
+		"Sync View Scroll",
+		"Terminal",
+		"TOML",
+		"TypeScript",
+		"VCS Gutter"
+	]
+}

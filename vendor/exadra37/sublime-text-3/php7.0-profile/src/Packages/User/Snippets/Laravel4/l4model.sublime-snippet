@@ -1,0 +1,92 @@
+<snippet>
+    <content><![CDATA[
+namespace ${1:Vendor}\\${2:Package}\Model;
+
+use ${4:Eloquent};
+
+/**
+ * @author  Paulo Silva(Exadra37)        <exadra37@gmail.com>
+ * @package ${1:Vendor}\\${2:Package}
+ * @since   ${5:2015}/${6:01}/${7:31}
+ */
+
+class ${8:Name} extends ${4:Eloquent}
+{
+    /**
+     * The property table specifies the name of the table to be used by this resource.
+     */
+    protected \$table = '${9:table_name}';
+
+    /**
+     * The hidden property specifies which attributes should not be exposed by default in this resource.
+     * \$hidden = array('password');
+     */
+    protected \$hidden = array();
+
+    /**
+     * The appends property specifies which attributes can be exposed by default in this resource.
+     * \$appends = array('first_name', 'last_name');
+     */
+    protected \$appends = array();
+
+    /**
+     * The fillable property specifies which attributes should be mass-assignable.
+     * This can be set at the class or instance level.
+     * \$fillable = array('first_name', 'last_name', 'email');
+     */
+    protected \$fillable = array();
+
+    /**
+     * The guarded property specifies which attributes should not be mass-assignable.
+     * This works like a black list.
+     * This can be set at the class or instance level.
+     * \$guarded = array('id', 'password'); or to block all guarded = array('*');
+     */
+    protected \$guarded = array();
+
+    /**
+     * This property by default is true and Eloquent will maintain the created_at and updated_at columns on your database table automatically.
+     * Simply add these timestamp columns to your table and Eloquent will take care of the rest.
+     * If you do not wish for Eloquent to maintain these columns set to false.
+     */
+    public \$timestamps = true;
+
+    /**
+     * validation rules for this resource
+     *  array(
+     *       'storeNumber' => 'required|integer|unique:stores,storeNumber',
+     *       'storeName'   => 'required|min:3|regex:/^[^0-9!<>,;?=+()@#"°{}_\$%:]*\$/u', regex check if the store name don't any of the characters 0-9!<>,;?=+()@#"°{}_\$%:
+     *       'address'     => 'required|min:10|regex:/^[^!<>?=+_@{}_\$%]*\$/u', // regex check if the address don't any of the characters !<>?=+@{}_\$%
+     *       'siteId'      => 'required|size:2|alpha',
+     *       'lat'         => 'required|regex:/^(-?[\d]{1,3})\.[\d]{6}\$/',
+     *       'lon'         => 'required|regex:/^(-?[\d]{1,3})\.[\d]{6}\$/',
+     *       'phoneNumber' => 'required|min:10|numeric',
+     *       'cfsFlag'     => 'required|in:1,0'
+     *   );
+     */
+    public static \$rules = array();
+
+    /**
+     * override default messages for the validation rules
+     * array(
+     *   'required' => 'The :attribute field is not present in the XML file.'
+     *   );
+     */
+    public static \$messages = array();
+
+    public function __construct()
+    {
+
+    }
+
+    public function __destruct()
+    {
+
+    }
+}
+]]></content>
+    <!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+    <tabTrigger>l4model</tabTrigger>
+    <!-- Optional: Set a scope to limit where the snippet will trigger -->
+    <!-- <scope>source.python</scope> -->
+</snippet>

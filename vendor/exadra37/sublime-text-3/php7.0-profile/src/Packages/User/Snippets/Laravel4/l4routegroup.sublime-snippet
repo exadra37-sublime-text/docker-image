@@ -1,0 +1,11 @@
+<snippet>
+	<content><![CDATA[
+Route::group(array('before' => '${1:cache-before}', 'after' => '${2:cache-after}', 'prefix' => '${3:name}'), function () {
+    Route::get('/${4:rest-route}', '${5:Vendor}\\${6:Package}\Controllers\\${7:controller@method}');
+});
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>l4route-group</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<!-- <scope>source.python</scope> -->
+</snippet>

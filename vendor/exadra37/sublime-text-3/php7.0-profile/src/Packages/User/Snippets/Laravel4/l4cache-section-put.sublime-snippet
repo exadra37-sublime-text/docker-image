@@ -1,0 +1,9 @@
+<snippet>
+	<content><![CDATA[
+Cache::section('${1:group}')->put('${2:key}', '${3:value}' , '${4:minutes}');
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>l4cache-section-put</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<!-- <scope>source.python</scope> -->
+</snippet>

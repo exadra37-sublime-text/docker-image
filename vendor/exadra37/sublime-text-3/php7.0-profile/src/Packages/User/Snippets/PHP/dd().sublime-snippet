@@ -1,0 +1,9 @@
+<snippet>
+    <content><![CDATA[
+dd(array('${1:this}' => \$${1:this}));
+]]></content>
+    <!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+    <tabTrigger>dd(</tabTrigger>
+    <!-- Optional: Set a scope to limit where the snippet will trigger -->
+    <!-- <scope>source.python</scope> -->
+</snippet>

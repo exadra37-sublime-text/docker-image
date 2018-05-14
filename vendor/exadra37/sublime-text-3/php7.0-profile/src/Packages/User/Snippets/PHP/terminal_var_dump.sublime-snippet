@@ -1,0 +1,9 @@
+<snippet>
+    <content><![CDATA[
+echo "\n\n-> \\\$${1:var}: \n";var_dump(\$${1:var});${2:die;}
+]]></content>
+    <!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+    <tabTrigger>tvardump</tabTrigger>
+    <!-- Optional: Set a scope to limit where the snippet will trigger -->
+    <!-- <scope>source.python</scope> -->
+</snippet>

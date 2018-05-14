@@ -1,0 +1,44 @@
+<snippet>
+	<content><![CDATA[
+    /**
+     * The ${4:}${1:}.
+     *
+     * @var ${4:}${1:}
+     */
+    private \$${1:};
+
+    /**
+     * The ${5:}${2:}.
+     *
+     * @var ${5:}${2:}
+     */
+    private \$${2:};
+
+    /**
+     * The ${6:}${3:}.
+     *
+     * @var ${6:}${3:}
+     */
+    private \$${3:};
+
+    /**
+     * @param ${4:}${1:} \$${1:} The ${4:}${1:}.
+     * @param ${5:}${2:} \$${2:} The ${5:}${2:}.
+     * @param ${6:}${3:} \$${3:} The ${6:}${3:}.
+     */
+    public function __construct(
+        ${4:}${1:} \$${1:},
+        ${5:}${2:} \$${2:},
+        ${6:}${3:} \$${3:}
+    ) {
+      \$this->${1:};
+      \$this->${2:};
+      \$this->${3:};
+    }
+
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>pfc</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.php</scope>
+</snippet>
