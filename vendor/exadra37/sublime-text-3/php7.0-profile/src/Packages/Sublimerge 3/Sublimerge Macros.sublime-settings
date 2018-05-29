@@ -82,6 +82,8 @@
 // - compare
 // - log
 // - sublime_command
+// - ok_cancel_dialog
+// - yes_no_cancel_dialog
 
 // NOTE: each string argument accepts ${variable} placeholders for variables.
 
@@ -225,6 +227,8 @@
 //     `value` - if set, allows to format output line. Accepts '@<number>' placeholders for `regexp`
 //     `greedy` - by default `capture` is not greedy and will stop on first (matching) line
 //     `empty_message` - if set, empty capture will display a message and stop flow
+//     `continue_if_empty` - if true, Macro execution will not be interrupted if captured output is empty.
+//                           Applies only when empty_message is set.
 
 //     capture {
 //         <execute> execute
@@ -233,6 +237,7 @@
 //         [, <string> value]
 //         [, <boolean> greedy=false]
 //         [, <string> empty_message]
+//         [, <boolean> continue_if_empty = false]
 //     }
 
 // prompt
@@ -254,6 +259,30 @@
 //     sublime_command {
 //         <string> command
 //         [, <object> args]
+//     }
+
+// ok_cancel_dialog
+
+//     Displays ok/cancel dialog to let the user make a decision. The macro proceeds to next steps
+//     when all steps defined in `on_ok` are done. Pressing Cancel button stops Macro execution.
+
+//     ok_cancel_dialog {
+//         <string> message,
+//         <list> on_ok
+//         [, <string> ok_title]
+//     }
+
+// yes_no_cancel_dialog
+
+//     Displays yes/no/cancel dialog to let the user make a decision. The macro proceeds to next steps
+//     when all steps defined in `on_yes` or `on_no` are done. Pressing Cancel button stops Macro execution.
+
+//     yes_no_cancel_dialog {
+//         <string> message,
+//         <list> on_yes,
+//         <list> on_no
+//         [, <string> yes_title]
+//         [, <string> no_title]
 //     }
 
 //  */
@@ -557,155 +586,306 @@
         /*
          * Git: Lists conflicted files and runs 3-way diff to resolve conflicts
          */
-        // {
-        //     "name": "Show and Resolve Conflicts",
-        //     "requires": "git",
-        //     "steps": [
-        //         {
-        //             "quick_panel": {
-        //                 "name": "conflicted_file",
-        //                 "source": {
-        //                     "execute": {
-        //                         "command": "${git} status --porcelain --untracked-files=no",
-        //                         "directory": "${CURRENT:REPO_ROOT}"
-        //                     },
-        //                     "item": {
-        //                         "regexp": "^UU\\s+\"?(.*?)\"?$",
-        //                         "caption": ["@1"],
-        //                         "value": "@1"
-        //                     },
-        //                     "empty_message": "There are no files in conflicted state"
-        //                 }
-        //             }
-        //         },
-        //         {
-        //             "capture": {
-        //                 "name": "theirs",
-        //                 "greedy": true,
-        //                 "value": "@1",
-        //                 "regexp": "^\\d{6}\\s+([a-z0-9]+)\\s+1.*$",
-        //                 "execute": {
-        //                     "command": "${git} ls-files -u --full-name '${conflicted_file}'",
-        //                     "directory": "${CURRENT:REPO_ROOT}"
-        //                 }
-        //             }
-        //         },
-        //         {
-        //             "capture": {
-        //                 "name": "base",
-        //                 "greedy": true,
-        //                 "value": "@1",
-        //                 "regexp": "^\\d{6}\\s+([a-z0-9]+)\\s+2.*$",
-        //                 "execute": {
-        //                     "command": "${git} ls-files -u --full-name '${conflicted_file}'",
-        //                     "directory": "${CURRENT:REPO_ROOT}"
-        //                 }
-        //             }
-        //         },
-        //         {
-        //             "capture": {
-        //                 "name": "mine",
-        //                 "greedy": true,
-        //                 "value": "@1",
-        //                 "regexp": "^\\d{6}\\s+([a-z0-9]+)\\s+3.*$",
-        //                 "execute": {
-        //                     "command": "${git} ls-files -u --full-name '${conflicted_file}'",
-        //                     "directory": "${CURRENT:REPO_ROOT}"
-        //                 }
-        //             }
-        //         },
-        //         {
-        //             "define": {
-        //                 "theirs_file": "${ENV:TEMP_DIR}/${theirs}${conflicted_file|ext}",
-        //                 "base_file": "${ENV:TEMP_DIR}/${base}${conflicted_file|ext}",
-        //                 "mine_file": "${ENV:TEMP_DIR}/${mine}${conflicted_file|ext}",
-        //                 "merged_file": "${conflicted_file}"
-        //             }
-        //         },
-        //         {
-        //             "capture": {
-        //                 "execute": {
-        //                     "command": "${git} show ${theirs} > ${theirs_file}",
-        //                 }
-        //             },
-        //         },
-        //         {
-        //             "capture": {
-        //                 "execute": {
-        //                     "command": "${git} show ${base} > ${base_file}",
-        //                 }
-        //             },
-        //         },
-        //         {
-        //             "capture": {
-        //                 "execute": {
-        //                     "command": "${git} show ${mine} > ${mine_file}",
-        //                 }
-        //             }
-        //         },
-        //         {
-        //             "compare": {
-        //                 "theirs": {
-        //                     "file": "${theirs_file}",
-        //                     "temporary": true,
-        //                     "title": "Theirs: ${conflicted_file}"
-        //                 },
-        //                 "base": {
-        //                     "file": "${base_file}",
-        //                     "temporary": true
-        //                 },
-        //                 "mine": {
-        //                     "file": "${mine_file}",
-        //                     "temporary": true,
-        //                     "title": "Mine: ${conflicted_file}"
-        //                 },
-        //                 "merged": {
-        //                     "file": "${merged_file}",
-        //                     "temporary": false
-        //                 }
-        //             }
-        //         }
-        //     ]
-        // },
+        {
+            "name": "List and Resolve Conflicts...",
+            "requires": "git",
+            "steps": [
+                {
+                    "quick_panel": {
+                        "name": "conflicted_file",
+                        "source": {
+                            "execute": {
+                                "command": "${git} status --porcelain --untracked-files=no",
+                                "directory": "${CURRENT:REPO_ROOT}"
+                            },
+                            "item": {
+                                "regexp": "^UU\\s+\"?(.*?)\"?$",
+                                "caption": ["@1"],
+                                "value": "@1"
+                            },
+                            "empty_message": "There are no files in conflicted state"
+                        }
+                    }
+                },
+                {
+                    "capture": {
+                        "name": "base",
+                        "greedy": true,
+                        "regexp": "^\\d{6}\\s+([a-z0-9]+)\\s+1.*$",
+                        "value": "@1",
+                        "execute": {
+                            "command": "${git} ls-files -u --full-name '${conflicted_file}'",
+                            "directory": "${CURRENT:REPO_ROOT}"
+                        }
+                    }
+                },
+                {
+                    "capture": {
+                        "name": "theirs",
+                        "greedy": true,
+                        "regexp": "^\\d{6}\\s+([a-z0-9]+)\\s+2.*$",
+                        "value": "@1",
+                        "execute": {
+                            "command": "${git} ls-files -u --full-name '${conflicted_file}'",
+                            "directory": "${CURRENT:REPO_ROOT}"
+                        }
+                    }
+                },
+                {
+                    "capture": {
+                        "name": "mine",
+                        "greedy": true,
+                        "regexp": "^\\d{6}\\s+([a-z0-9]+)\\s+3.*$",
+                        "value": "@1",
+                        "execute": {
+                            "command": "${git} ls-files -u --full-name '${conflicted_file}'",
+                            "directory": "${CURRENT:REPO_ROOT}"
+                        }
+                    }
+                },
+                {
+                    "define": {
+                        "theirs_file": "${ENV:TEMP_DIR}/${theirs}${conflicted_file|ext}",
+                        "base_file": "${ENV:TEMP_DIR}/${base}${conflicted_file|ext}",
+                        "mine_file": "${ENV:TEMP_DIR}/${mine}${conflicted_file|ext}",
+                        "merged_file": "${CURRENT:REPO_ROOT}/${conflicted_file}"
+                    }
+                },
+                {
+                    "capture": {
+                        "execute": {
+                            "command": "${git} show ${theirs} > ${theirs_file}",
+                            "directory": "${CURRENT:REPO_ROOT}"
+                        }
+                    },
+                },
+                {
+                    "capture": {
+                        "execute": {
+                            "command": "${git} show ${base} > ${base_file}",
+                            "directory": "${CURRENT:REPO_ROOT}"
+                        }
+                    },
+                },
+                {
+                    "capture": {
+                        "execute": {
+                            "command": "${git} show ${mine} > ${mine_file}",
+                            "directory": "${CURRENT:REPO_ROOT}"
+                        }
+                    }
+                },
+                {
+                    "compare": {
+                        "theirs": {
+                            "file": "${theirs_file}",
+                            "temporary": true,
+                            "title": "Theirs: ${conflicted_file}"
+                        },
+                        "base": {
+                            "file": "${base_file}",
+                            "temporary": true
+                        },
+                        "mine": {
+                            "file": "${mine_file}",
+                            "temporary": true,
+                            "title": "Mine: ${conflicted_file}"
+                        },
+                        "merged": {
+                            "file": "${merged_file}",
+                            "temporary": false
+                        }
+                    }
+                },
+                {
+                    "ok_cancel_dialog": {
+                        "message": "${conflicted_file}\n\nMark as resolved?",
+                        "ok_title": "Resolved",
+                        "on_ok": [
+                            {
+                                "capture": {
+                                    "execute": {
+                                        "command": "${git} add '${conflicted_file}'",
+                                        "directory": "${CURRENT:REPO_ROOT}"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+
+        /*
+         * Git: Allows to resolve conflicts in current file
+         */
+        {
+            "name": "Resolve Conflicts in Current File",
+            "requires": "git",
+            "steps": [
+                {
+                    "define": {
+                        "conflicted_file": "${CURRENT:FILE|repopath}"
+                    }
+                },
+                {
+                    "capture": {
+                        "execute": {
+                            "command": "${git} ls-files -u '${conflicted_file}'",
+                            "directory": "${CURRENT:REPO_ROOT}"
+                        },
+                        "regexp": "^(.*)$",
+                        "value": "@1",
+                        "empty_message": "No conflicts in file"
+                    }
+                },
+                {
+                    "capture": {
+                        "name": "base",
+                        "greedy": true,
+                        "regexp": "^\\d{6}\\s+([a-z0-9]+)\\s+1.*$",
+                        "value": "@1",
+                        "execute": {
+                            "command": "${git} ls-files -u --full-name '${conflicted_file}'",
+                            "directory": "${CURRENT:REPO_ROOT}"
+                        }
+                    }
+                },
+                {
+                    "capture": {
+                        "name": "theirs",
+                        "greedy": true,
+                        "regexp": "^\\d{6}\\s+([a-z0-9]+)\\s+2.*$",
+                        "value": "@1",
+                        "execute": {
+                            "command": "${git} ls-files -u --full-name '${conflicted_file}'",
+                            "directory": "${CURRENT:REPO_ROOT}"
+                        }
+                    }
+                },
+                {
+                    "capture": {
+                        "name": "mine",
+                        "greedy": true,
+                        "regexp": "^\\d{6}\\s+([a-z0-9]+)\\s+3.*$",
+                        "value": "@1",
+                        "execute": {
+                            "command": "${git} ls-files -u --full-name '${conflicted_file}'",
+                            "directory": "${CURRENT:REPO_ROOT}"
+                        }
+                    }
+                },
+                {
+                    "define": {
+                        "theirs_file": "${ENV:TEMP_DIR}/${theirs}${conflicted_file|ext}",
+                        "base_file": "${ENV:TEMP_DIR}/${base}${conflicted_file|ext}",
+                        "mine_file": "${ENV:TEMP_DIR}/${mine}${conflicted_file|ext}",
+                        "merged_file": "${CURRENT:FILE}"
+                    }
+                },
+                {
+                    "capture": {
+                        "execute": {
+                            "command": "${git} show ${theirs} > ${theirs_file}",
+                            "directory": "${CURRENT:REPO_ROOT}"
+                        }
+                    },
+                },
+                {
+                    "capture": {
+                        "execute": {
+                            "command": "${git} show ${base} > ${base_file}",
+                            "directory": "${CURRENT:REPO_ROOT}"
+                        }
+                    },
+                },
+                {
+                    "capture": {
+                        "execute": {
+                            "command": "${git} show ${mine} > ${mine_file}",
+                            "directory": "${CURRENT:REPO_ROOT}"
+                        }
+                    }
+                },
+                {
+                    "compare": {
+                        "theirs": {
+                            "file": "${theirs_file}",
+                            "temporary": true,
+                            "title": "Theirs: ${conflicted_file}"
+                        },
+                        "base": {
+                            "file": "${base_file}",
+                            "temporary": true
+                        },
+                        "mine": {
+                            "file": "${mine_file}",
+                            "temporary": true,
+                            "title": "Mine: ${conflicted_file}"
+                        },
+                        "merged": {
+                            "file": "${merged_file}",
+                            "temporary": false
+                        }
+                    }
+                },
+                {
+                    "ok_cancel_dialog": {
+                        "message": "${conflicted_file}\n\nMark as resolved?",
+                        "ok_title": "Resolved",
+                        "on_ok": [
+                            {
+                                "capture": {
+                                    "execute": {
+                                        "command": "${git} add '${conflicted_file}'",
+                                        "directory": "${CURRENT:REPO_ROOT}"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
 
         /*
          * Git: Allows to run custom Git command and compare working file with command's output
          */
-        // {
-        //     "name": "Custom Git Command...",
-        //     "requires": "git",
-        //     "steps": [
-        //         {
-        //             "prompt": {
-        //                 "name": "args",
-        //                 "caption": "${git}"
-        //             }
-        //         },
-        //         {
-        //             "define": {
-        //                 "tmp_file": "${ENV:TEMP_DIR}/${CURRENT:FILE|basename}@custom"
-        //             }
-        //         },
-        //         {
-        //             "compare": {
-        //                 "execute": {
-        //                     "command": "${git} ${args} > \"${tmp_file}\"",
-        //                     "directory": "${CURRENT:FILE_DIR}"
-        //                 },
+        {
+            "name": "Compare to Custom Git Command Output...",
+            "requires": "git",
+            "steps": [
+                {
+                    "prompt": {
+                        "name": "args",
+                        "caption": "${git}"
+                    }
+                },
+                {
+                    "define": {
+                        "tmp_file": "${ENV:TEMP_DIR}/${CURRENT:FILE|basename}@custom"
+                    }
+                },
+                {
+                    "compare": {
+                        "execute": {
+                            "command": "${git} ${args} > \"${tmp_file}\"",
+                            "directory": "${CURRENT:FILE_DIR}"
+                        },
 
-        //                 "left": {
-        //                     "file": "${CURRENT:FILE}",
-        //                     "temporary": false
-        //                 },
+                        "left": {
+                            "file": "${CURRENT:FILE}",
+                            "temporary": false
+                        },
 
-        //                 "right": {
-        //                     "file": "${tmp_file}",
-        //                     "temporary": true
-        //                 }
-        //             }
-        //         }
-        //     ]
-        // },
+                        "right": {
+                            "file": "${tmp_file}",
+                            "temporary": true
+                        }
+                    }
+                }
+            ]
+        },
 
         /************************************* SVN *************************************/
 
@@ -751,6 +931,45 @@
                         "right": {
                             "file": "${CURRENT:REPO_ROOT}/${modified_file}",
                             "temporary": false
+                        }
+                    }
+                }
+            ]
+        },
+
+        /*
+         * SVN: Allows to run custom SVN command and compare working file with command's output
+         */
+        {
+            "name": "Compare to Custom SVN Command Output...",
+            "requires": "svn",
+            "steps": [
+                {
+                    "prompt": {
+                        "name": "args",
+                        "caption": "${svn}"
+                    }
+                },
+                {
+                    "define": {
+                        "tmp_file": "${ENV:TEMP_DIR}/${CURRENT:FILE|basename}@custom"
+                    }
+                },
+                {
+                    "compare": {
+                        "execute": {
+                            "command": "${svn} ${args} > \"${tmp_file}\"",
+                            "directory": "${CURRENT:FILE_DIR}"
+                        },
+
+                        "left": {
+                            "file": "${CURRENT:FILE}",
+                            "temporary": false
+                        },
+
+                        "right": {
+                            "file": "${tmp_file}",
+                            "temporary": true
                         }
                     }
                 }
@@ -856,6 +1075,45 @@
                     }
                 }
             ]
-        }
+        },
+
+        /*
+         * Mercurial: Allows to run custom Mercurial command and compare working file with command's output
+         */
+        {
+            "name": "Compare to Custom Hg Command Output...",
+            "requires": "hg",
+            "steps": [
+                {
+                    "prompt": {
+                        "name": "args",
+                        "caption": "${hg}"
+                    }
+                },
+                {
+                    "define": {
+                        "tmp_file": "${ENV:TEMP_DIR}/${CURRENT:FILE|basename}@custom"
+                    }
+                },
+                {
+                    "compare": {
+                        "execute": {
+                            "command": "${hg} ${args} > \"${tmp_file}\"",
+                            "directory": "${CURRENT:FILE_DIR}"
+                        },
+
+                        "left": {
+                            "file": "${CURRENT:FILE}",
+                            "temporary": false
+                        },
+
+                        "right": {
+                            "file": "${tmp_file}",
+                            "temporary": true
+                        }
+                    }
+                }
+            ]
+        },
     ]
 }

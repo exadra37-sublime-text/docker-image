@@ -199,7 +199,17 @@
     // # END OF UNIMPLEMENTED FEATURES' SETTINGS                                                              #
     // ########################################################################################################
 
+    //User-defined whitelist for commands to be available to run in diff view. Some commands may cause
+    //the diff view to work not properly and lead to undefined behavior. Use with caution!
+    //
+    //Example: 
+    //  {
+    //     "command1": "*",                                  //accepts command with any arguments
+    //     "command2": {"arg1": "*"},                        //accepts command with certain arguments and any arguments' values
+    //     "command3": {"arg1": ["value1", "value2"]}        //accepts command with certain arguments and certain possible values
+    //  }
 
+    "diff_view_allowed_commands": {},
 
 
     //Whether to display summary panel
