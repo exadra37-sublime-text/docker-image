@@ -71,6 +71,9 @@ RUN apt-get update && \
         # Create default dirs in User home directory necessary for Sublime
         su "${CONTAINER_USER}" -c 'bash -c "mkdir -p ~/.local/share ~/.config/sublime-text-3/{Cache,Local,Index,Packages,Installed\ Packages}"' && \
 
+        # Increase inotify watch limit
+	echo fs.inotify.max_user_watches=524288 >> /etc/sysctl.conf && \
+
         # Force installation of missing dependencies for Sublime
         apt-get -y -f install && \
         rm -rvf sublime-text_build-"${SUBLIME_BUILD}"_amd64.deb && \
